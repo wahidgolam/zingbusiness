@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="24dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:orientation="horizontal">
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/order_image"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginRight="8dp"
+                app:cardCornerRadius="6dp">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:foreground="@drawable/image_overlay_full"
+                    android:src="@drawable/food_image" />
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/order_image"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/placed_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/urbanist_medium"
+                    android:text="5 mins ago"
+                    android:textColor="@color/grey"
+                    android:textSize="12dp" />
+
+                <TextView
+                    android:id="@+id/item_name_quantity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/urbanist_semibold"
+                    android:letterSpacing="0"
+                    android:text="French Fries +5"
+                    android:textColor="@color/black"
+                    android:textSize="18dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:visibility="gone"
+                android:id="@+id/active_1"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentRight="true"
+                android:gravity="right"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/timer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/menlo_bold"
+                    android:letterSpacing="0"
+                    android:text="-:-"
+                    android:textColor="@color/black"
+                    android:textSize="18dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/urbanist_medium"
+                    android:text="time remaining"
+                    android:textColor="@color/grey"
+                    android:textSize="12dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/request_1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:gravity="right"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/order_total"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/menlo_bold"
+                    android:letterSpacing="0"
+                    android:text="₹ 560.00"
+                    android:textColor="@color/black"
+                    android:textSize="18dp" />
+
+                <TextView
+                    android:id="@+id/status_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/urbanist_medium"
+                    android:text="paid"
+                    android:textColor="@color/grey"
+                    android:textSize="12dp" />
+            </LinearLayout>
+        </RelativeLayout>
+        <LinearLayout
+            android:visibility="gone"
+            android:id="@+id/request_2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="16dp"
+            android:paddingHorizontal="24dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Choose time required to complete order"
+                android:fontFamily="@font/urbanist_medium"
+                android:textSize="12dp"/>
+
+            <LinearLayout
+                android:gravity="center"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="12dp">
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/group1card1"
+                    android:layout_width="52dp"
+                    android:layout_height="52dp"
+                    android:backgroundTint="@null"
+                    app:cardBackgroundColor="@color/transparent_orange">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical">
+                        <TextView
+                            android:id="@+id/group1text1"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="5"
+                            android:textAlignment="center"
+                            android:textColor="@color/black"
+                            android:textSize="16dp"
+                            android:fontFamily="@font/urbanist_bold"/>
+                        <TextView
+                            android:id="@+id/group2text1"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="min"
+                            android:textAlignment="center"
+                            android:textColor="@color/black"
+                            android:textSize="12dp"
+                            android:fontFamily="@font/urbanist_medium"/>
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+                <Space
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"/>
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/group1card2"
+                    android:layout_width="52dp"
+                    android:layout_height="52dp"
+                    android:backgroundTint="@null"
+                    app:cardBackgroundColor="@color/transparent_orange">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical">
+                        <TextView
+                            android:id="@+id/group1text2"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="10"
+                            android:textAlignment="center"
+                            android:textColor="@color/black"
+                            android:textSize="16dp"
+                            android:fontFamily="@font/urbanist_bold"/>
+                        <TextView
+                            android:id="@+id/group2text2"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="min"
+                            android:textAlignment="center"
+                            android:textColor="@color/black"
+                            android:textSize="12dp"
+                            android:fontFamily="@font/urbanist_medium"/>
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+                <Space
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"/>
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/group1card3"
+                    android:layout_width="52dp"
+                    android:layout_height="52dp"
+                    android:backgroundTint="@null"
+                    app:cardBackgroundColor="@color/transparent_orange">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical">
+                        <TextView
+                            android:id="@+id/group1text3"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="15"
+                            android:textAlignment="center"
+                            android:textColor="@color/black"
+                            android:textSize="16dp"
+                            android:fontFamily="@font/urbanist_bold"/>
+                        <TextView
+                            android:id="@+id/group2text3"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="min"
+                            android:textAlignment="center"
+                            android:textColor="@color/black"
+                            android:textSize="12dp"
+                            android:fontFamily="@font/urbanist_medium"/>
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+                <Space
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"/>
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/group1card4"
+                    android:layout_width="52dp"
+                    android:layout_height="52dp"
+                    app:cardBackgroundColor="@color/dark_orange"
+                    app:strokeWidth="0dp"
+                    app:strokeColor="@color/black">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical">
+                        <TextView
+                            android:id="@+id/group1text4"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="20"
+                            android:textAlignment="center"
+                            android:textColor="@color/white"
+                            android:textSize="16dp"
+                            android:fontFamily="@font/urbanist_bold"/>
+                        <TextView
+                            android:id="@+id/group2text4"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="min"
+                            android:textAlignment="center"
+                            android:textColor="@color/overlay_white"
+                            android:textSize="12dp"
+                            android:fontFamily="@font/urbanist_medium"/>
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+                <Space
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"/>
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/group1card5"
+                    android:layout_width="52dp"
+                    android:layout_height="52dp"
+                    android:backgroundTint="@null"
+                    app:cardBackgroundColor="@color/transparent_orange">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical">
+                        <TextView
+                            android:id="@+id/group1text5"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="25"
+                            android:textAlignment="center"
+                            android:textColor="@color/black"
+                            android:textSize="16dp"
+                            android:fontFamily="@font/urbanist_bold"/>
+                        <TextView
+                            android:id="@+id/group2text5"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="min"
+                            android:textAlignment="center"
+                            android:textColor="@color/black"
+                            android:textSize="12dp"
+                            android:fontFamily="@font/urbanist_medium"/>
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+        </LinearLayout>
+        <LinearLayout
+            android:visibility="gone"
+            android:id="@+id/request_3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:paddingHorizontal="24dp"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="16dp">
+            <Button
+                android:clickable="true"
+                android:id="@+id/deny_button"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:background="@drawable/button_stroked"
+                android:text="Deny"
+                android:textAllCaps="false"
+                android:textSize="14dp"
+                android:fontFamily="@font/urbanist_medium"
+                android:letterSpacing="0"
+                android:textColor="@color/dark_orange"/>
+            <Space
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"/>
+            <Button
+                android:clickable="true"
+                android:id="@+id/accept_button"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:background="@drawable/button_filled"
+                android:text="Accept"
+                android:textAllCaps="false"
+                android:textSize="14dp"
+                android:fontFamily="@font/urbanist_medium"
+                android:letterSpacing="0"/>
+
+        </LinearLayout>
+
+        <RelativeLayout
+            android:background="@color/overlay_white"
+            android:visibility="visible"
+            android:id="@+id/active_2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:paddingHorizontal="24dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Food prepared"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:fontFamily="@font/urbanist_medium"
+                android:textColor="@color/black"/>
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/switch1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:checked="false"
+                android:fontFamily="@font/urbanist_medium" />
+        </RelativeLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

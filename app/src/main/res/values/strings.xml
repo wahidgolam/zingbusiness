@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Zing Business</string>
+    <string name="primary_color">Primary color</string>
+    <string name="button">Button</string>
+    <string name="secondary_color">Secondary color</string>
+    <string name="email_icon">email icon</string>
+    <string name="firebase_web_client">141551690793-v2ju2m85iigltgs57ip0niipmvbusmbt.apps.googleusercontent.com</string>
+</resources>

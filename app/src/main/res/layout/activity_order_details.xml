@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".OrderDetails">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center">
+        <ImageView
+            android:layout_width="84dp"
+            android:layout_height="44dp"
+            android:src="@drawable/onblogo"
+            android:layout_marginBottom="108dp"/>
+        <TextView
+            android:id="@+id/msg_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Disptach Order"
+            android:fontFamily="@font/urbanist_semibold"
+            android:textSize="20dp"
+            android:textColor="@color/black"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Thank you for your pleasant service"
+            android:fontFamily="@font/urbanist_medium"
+            android:textSize="14dp"/>
+
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_marginHorizontal="24dp"
+            android:layout_marginTop="32dp"
+            android:id="@+id/order_card"
+            android:layout_width="match_parent"
+            android:layout_height="72dp"
+            android:layout_gravity="center"
+            android:backgroundTint="@null"
+            android:clickable="true"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:padding="16dp"
+            app:cardBackgroundColor="@color/dark_orange"
+            app:cardCornerRadius="12dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginVertical="16dp"
+                android:orientation="horizontal">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/order_image"
+                    android:layout_width="40dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginRight="8dp"
+                    app:cardCornerRadius="6dp">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:foreground="@drawable/image_overlay_full"
+                        android:src="@drawable/food_image" />
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_toRightOf="@+id/order_image"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/outlet_name_id"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/urbanist_medium"
+                        android:text="Red Chillies #8911"
+                        android:textColor="@color/overlay_white"
+                        android:textSize="12dp" />
+
+                    <TextView
+                        android:id="@+id/item_name_quantity"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/urbanist_semibold"
+                        android:letterSpacing="0"
+                        android:text="French Fries +5"
+                        android:textColor="@color/white"
+                        android:textSize="18dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentRight="true"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/timer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/menlo_bold"
+                        android:letterSpacing="0"
+                        android:text="okay"
+                        android:textColor="@color/white"
+                        android:textSize="18dp" />
+
+                    <TextView
+                        android:id="@+id/status_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/urbanist_medium"
+                        android:text="ready to dispatch"
+                        android:textColor="@color/overlay_white"
+                        android:textSize="12dp" />
+                </LinearLayout>
+            </RelativeLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+        <TextView
+            android:id="@+id/status2"
+            android:layout_marginTop="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Order paid"
+            android:fontFamily="@font/urbanist_medium"
+            android:textSize="14dp"/>
+        <Button
+            android:id="@+id/not_prepared_button"
+            android:onClick="notPrepared"
+            android:layout_marginTop="148dp"
+            android:layout_width="match_parent"
+            android:layout_marginHorizontal="24dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:background="@drawable/button_stroked"
+            android:backgroundTint="@null"
+            android:fontFamily="@font/urbanist_semibold"
+            android:text="Not prepared"
+            android:textAllCaps="false"
+            android:textColor="@color/dark_orange"
+            android:textSize="14dp"
+            android:letterSpacing="0.01"/>
+        <Button
+            android:id="@+id/prepared_button"
+            android:onClick="prepared"
+            android:layout_marginTop="16dp"
+            android:layout_width="match_parent"
+            android:layout_marginHorizontal="24dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:background="@drawable/button_filled"
+            android:backgroundTint="@null"
+            android:fontFamily="@font/urbanist_semibold"
+            android:text="Prepared. Dispatch"
+            android:textAllCaps="false"
+            android:textSize="14dp"
+            android:letterSpacing="0.01"/>
+
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
