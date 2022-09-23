@@ -20,6 +20,7 @@ import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
@@ -52,7 +53,7 @@ public class ItemAdapter extends
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Item item = itemList.get(position);
+        Item item = itemList.get(holder.getAdapterPosition());
         // Set item views based on your views and data model
         //handle is available
         TextView itemName = holder.itemName;
@@ -63,6 +64,9 @@ public class ItemAdapter extends
         RelativeLayout itemRVLayout = holder.itemRVLayout;
 
         //render basic data
+        if(item.getItemImage().startsWith("http")) {
+            Glide.with(context).load(item.getItemImage()).into(itemImage);
+        }
         String priceDisplayText = "₹"+item.getPrice()+".00";
         itemName.setText(item.getName());
         itemPrice.setText(priceDisplayText);
@@ -78,7 +82,6 @@ public class ItemAdapter extends
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 item.setAvailableOrNot(isChecked);
                 ((Settings) context).updateItemAvailability(item);
-                notifyDataSetChanged();
             }
         });
     }

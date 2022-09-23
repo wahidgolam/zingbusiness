@@ -108,11 +108,13 @@
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/urbanist_bold"
                             android:letterSpacing="0"
-                            android:text="Ice N' Spice"
+                            android:text="Not registered"
                             android:textColor="@color/white"
                             android:textSize="28dp" />
 
                         <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/openStatus"
+                            android:visibility="invisible"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginLeft="8dp"
@@ -148,7 +150,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:fontFamily="@font/urbanist_medium"
-                        android:text="Snacks and Shawarma"
+                        android:text="Your account isn't registered yet"
                         android:textColor="@color/overlay_white"
                         android:textSize="12dp" />
                 </LinearLayout>
@@ -182,7 +184,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="6dp"
                             android:fontFamily="@font/urbanist_semibold"
-                            android:text="12 min"
+                            android:text="N/A"
                             android:textColor="@color/black"
                             android:textSize="18dp" />
 
@@ -252,6 +254,7 @@
                                 android:orientation="vertical">
 
                                 <LinearLayout
+                                    android:id="@+id/tabs"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:layout_marginBottom="24dp"

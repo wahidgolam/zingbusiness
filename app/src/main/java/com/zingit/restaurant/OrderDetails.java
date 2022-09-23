@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -98,7 +99,7 @@ public class OrderDetails extends AppCompatActivity {
                 else{
                     timeDisplay = ((long) (timeDifferenceMin/60)) + " hours";
                 }
-                msgText.setText("Collection "+ status + "by "+timeDisplay);
+                msgText.setText("Collection "+ status + " by "+timeDisplay);
             }
             else{
                 timerText.setText("error");
@@ -134,22 +135,33 @@ public class OrderDetails extends AppCompatActivity {
         //what if already dispatched
         //show how much late they have come
         //order name is null -> old order
+        LoadingDialog loadingDialog2 = new LoadingDialog(OrderDetails.this, "Thanks for your pleasant service");
+        loadingDialog2.startLoadingDialog();
+        final MediaPlayer mp = MediaPlayer.create(this, R.raw.dispatch);
+        mp.start();
+        mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            public void onCompletion(MediaPlayer mp) {
+                mp.release();
+            }
+        });
         Date date = new Date();
         Timestamp collectedTimeStamp = new Timestamp(date);
         order.setStatusCode(4);
         order.setCollectedTime(collectedTimeStamp);
         if(orderId!=null) {
             updateOrderToDataHolder();
-            db.collection("order").document(orderId).update("statusCode", 4, "collectedTimestamp", collectedTimeStamp).addOnCompleteListener(new OnCompleteListener<Void>() {
+            db.collection("order").document(orderId).update("statusCode", 4, "collectedTime", collectedTimeStamp).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     Toast.makeText(OrderDetails.this, "Order has been dispatched", Toast.LENGTH_SHORT).show();
+                    loadingDialog2.dismissDialog();
                     navigateToHome();
                 }
             });
         }
         else{
             Toast.makeText(this, "Error: Order not updated", Toast.LENGTH_SHORT).show();
+            loadingDialog2.dismissDialog();
             navigateToHome();
         }
     }

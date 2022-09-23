@@ -12,7 +12,7 @@ public class Outlet {
     private String campusID;
     private String id;
     private String zingTime;
-
+    private int numOrders;
 
     public Outlet(String name, String openStatus, String outletImage, String description, int category, String campusID, String id, String zingTime) {
         this.name = name;
@@ -62,5 +62,17 @@ public class Outlet {
 
     public String getZingTime() {
         return zingTime;
+    }
+
+    public void setZingTime(String zingTime) {
+        this.zingTime = zingTime;
+    }
+
+    public int getNumOrders() {
+        return numOrders;
+    }
+
+    public void setNumOrders(int numOrders) {
+        this.numOrders = numOrders;
     }
 }

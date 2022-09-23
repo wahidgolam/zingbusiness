@@ -1,7 +1,5 @@
 package com.zingit.restaurant;
 
-import static com.google.firebase.firestore.DocumentChange.Type.ADDED;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -25,9 +23,13 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.nearby.messages.Message;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
@@ -40,13 +42,20 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+import com.zingit.restaurant.model.RefundToken;
+import com.zingit.restaurant.remote.RefundCloudFunction;
+import com.zingit.restaurant.remote.RefundRetrofitClient;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.WeakHashMap;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 
 public class Homescreen extends AppCompatActivity {
 
@@ -54,6 +63,7 @@ public class Homescreen extends AppCompatActivity {
     ArrayList<Order> orderList;
 
     FirebaseFirestore db;
+
 
     LoadingDialog loadingDialog;
     LoadingDialog orderBook;
@@ -73,9 +83,16 @@ public class Homescreen extends AppCompatActivity {
     LinearLayout emptyOrderView;
     RelativeLayout background;
     Intent serviceIntent;
-
+    RefundCloudFunction refundCloudFunction;
+    CompositeDisposable compositeDisposable;
     Outlet currentOutlet;
     OrderItemAdapter orderItemAdapter;
+    MaterialCardView openStatus;
+    LinearLayout tabs;
+    MaterialCardView dispatch;
+    FloatingActionButton settings;
+    FloatingActionButton earnings;
+
 
     int request_new = 0;
     int active_new = 0;
@@ -95,6 +112,9 @@ public class Homescreen extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
 
         //UI variables
+        dispatch = findViewById(R.id.dispatchButton);
+        settings = findViewById(R.id.fab);
+        earnings = findViewById(R.id.fab2);
         outletName = findViewById(R.id.outlet_name);
         outletDesc = findViewById(R.id.outlet_desc);
         outletStatus = findViewById(R.id.outlet_status);
@@ -110,6 +130,10 @@ public class Homescreen extends AppCompatActivity {
         tabDetails = findViewById(R.id.tab_details);
         emptyOrderView = findViewById(R.id.empty_order_view);
         background = findViewById(R.id.background);
+        openStatus = findViewById(R.id.openStatus);
+        tabs = findViewById(R.id.tabs);
+        compositeDisposable = new CompositeDisposable();
+        refundCloudFunction = RefundRetrofitClient.getInstance().create(RefundCloudFunction.class);
 
         //creating notification channel
         createNotificationChannel();
@@ -186,14 +210,25 @@ public class Homescreen extends AppCompatActivity {
 
         }else{
             //display blank ui
+            dispatch.setVisibility(View.GONE);
+            settings.setVisibility(View.GONE);
+            earnings.setVisibility(View.GONE);
+            tabs.setVisibility(View.GONE);
+            openStatus.setVisibility(View.INVISIBLE);
+            orderRV.setVisibility(View.GONE);
+            tabDetails.setVisibility(View.GONE);
+            emptyOrderView.setVisibility(View.VISIBLE);
             Toast.makeText(this, "You haven't been registered yet", Toast.LENGTH_SHORT).show();
         }
     }
     public void setupUI(){
+        if(currentOutlet!=null){
+            openStatus.setVisibility(View.VISIBLE);
+        }
         outletName.setText(currentOutlet.getName());
         outletDesc.setText(currentOutlet.getDescription());
         outletStatus.setText(currentOutlet.getOpenStatus());
-        String outletZingDisplayText = currentOutlet.getZingTime()+" mins";
+        String outletZingDisplayText = currentOutlet.getZingTime() +" mins";
         outletZingTime.setText(outletZingDisplayText);
         if(currentOutlet.getOpenStatus().equals("CLOSED")){
             background.setBackgroundColor(getColor(R.color.grey));
@@ -207,6 +242,7 @@ public class Homescreen extends AppCompatActivity {
             opDetails = "Order History";
         opHeading.setText(opDetails);
         if (orderList.isEmpty()){
+            tabs.setVisibility(View.GONE);
             orderRV.setVisibility(View.GONE);
             tabDetails.setVisibility(View.GONE);
             emptyOrderView.setVisibility(View.VISIBLE);
@@ -421,6 +457,33 @@ public class Homescreen extends AppCompatActivity {
         cal.setTimeInMillis((acceptTimestamp.getSeconds()+time)*1000);
 
         Timestamp zingTime = new Timestamp(cal.getTime());
+        String zingTimeString = currentOutlet.getZingTime();
+        Log.d("1", zingTimeString);
+        int zingTimeInt = Integer.parseInt(zingTimeString);
+        Log.d("2", String.valueOf(zingTimeInt));
+        //get zing time
+        int num_orders = currentOutlet.getNumOrders();
+        Log.d("3", String.valueOf(num_orders));
+        if(num_orders<5){
+            zingTimeInt = (zingTimeInt*num_orders++ + (int)((zingTime.getSeconds()-order.getPlacedTime().getSeconds())/60.0))/num_orders;
+            zingTimeString = String.valueOf(zingTimeInt);
+            Log.d("6", String.valueOf(zingTimeString));
+        }
+        else{
+            num_orders=1;
+            zingTimeInt = (int)((zingTime.getSeconds()-order.getPlacedTime().getSeconds())/60.0);
+            zingTimeString = String.valueOf(zingTimeInt);
+        }
+        //update zing time
+        Dataholder.outlet.setZingTime(zingTimeString);
+        Dataholder.outlet.setNumOrders(num_orders);
+        currentOutlet.setZingTime(zingTimeString);
+        currentOutlet.setNumOrders(num_orders);
+        String outletZingDisplayText = currentOutlet.getZingTime()+" mins";
+        outletZingTime.setText(outletZingDisplayText);
+        updateZingTime(zingTimeString);
+        //push to firebase
+        //push to dataholder
 
         int statusCode = 2;
         order.setZingTime(zingTime);
@@ -438,12 +501,28 @@ public class Homescreen extends AppCompatActivity {
                 orderItemAdapter.notifyDataSetChanged();
                 loadingDialog2.dismissDialog();
                 addEarning(order);
+                sendNotification();
+
             }
         });
     }
+    public void sendNotification(){
+
+    }
+    public void updateZingTime(String zingTimeString){
+        db.collection("outlet").document(Dataholder.outlet.getId())
+                .update(
+                        "zingTime", zingTimeString,
+                        "numOrders", currentOutlet.getNumOrders()).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        Toast.makeText(Homescreen.this, "Zing time updated", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
     public void addEarning(Order order){
         orderBook.startLoadingDialog();
-        db.collection("earning").whereEqualTo("date", startOfDay()).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        db.collection("earning").whereEqualTo("date", startOfDay()).whereEqualTo("outletID", Dataholder.outlet.getId()).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if(task.getResult().isEmpty()){
@@ -502,8 +581,48 @@ public class Homescreen extends AppCompatActivity {
                 updateOrder(order);
                 orderItemAdapter.notifyDataSetChanged();
                 loadingDialog2.dismissDialog();
+                //initiate refund
+                initRefund(order);
             }
         });
+    }
+    public void initRefund(Order order){
+        LoadingDialog loadingDialog2 = new LoadingDialog(Homescreen.this, "Initiating refund");
+        loadingDialog2.startLoadingDialog();
+        Log.d(order.getOrderID(), Long.toString(order.getTotalAmount()));
+        compositeDisposable.add(refundCloudFunction.getToken(order.getPaymentOrderID(), Long.toString(order.getTotalAmount())).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<RefundToken>() {
+                    @Override
+                    public void accept(RefundToken refundToken) throws Exception {
+                        if(refundToken.getCf_refund_id()!=null) {
+                            //refund successful
+                            //refund successful
+                            loadingDialog2.dismissDialog();
+                            db.collection("order").document(order.getOrderID())
+                                    .update(
+                                            "statusCode",0,
+                                            "refundID", refundToken.getCf_refund_id()).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            Toast.makeText(Homescreen.this, "Refund successful", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                        }
+                        else{
+                            Toast.makeText(Homescreen.this, "Could not initiate refund for the last order. Contact support", Toast.LENGTH_SHORT).show();
+                            loadingDialog2.dismissDialog();
+                        }
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Exception {
+                        Toast.makeText(Homescreen.this, "error: "+throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(Homescreen.this, "Could not initiate refund for the last order. Contact support", Toast.LENGTH_SHORT).show();
+                        Log.d("Initiating Payment: Error", throwable.getMessage());
+                        loadingDialog2.dismissDialog();
+                    }
+                }));
     }
     public void orderPrepared(Order order){
         active_new--;
@@ -515,12 +634,12 @@ public class Homescreen extends AppCompatActivity {
         Timestamp preparedTimestamp = new Timestamp(date);
 
         int statusCode = 3;
-        order.setReactionTime(preparedTimestamp);
+        order.setPreparedTime(preparedTimestamp);
         order.setStatusCode(statusCode);
         db.collection("order").document(order.getOrderID())
                 .update(
                         "statusCode", 3,
-                        "reactionTime", preparedTimestamp).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        "preparedTime", preparedTimestamp).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 updateOrder(order);
@@ -551,7 +670,13 @@ public class Homescreen extends AppCompatActivity {
         defaultStyle(historyText,historyTab);
 
         LoadingDialog loadingDialog2 = new LoadingDialog(Homescreen.this, "Fetching new requests");
-        loadingDialog2.startLoadingDialog();
+        try {
+            loadingDialog2.startLoadingDialog();
+        }
+        catch (Exception e)
+        {
+            Log.e("Error",e.getLocalizedMessage());
+        }
 
         updateRVList();
         orderList.sort(Comparator.comparing(Order::getPlacedTime));
@@ -685,5 +810,10 @@ public class Homescreen extends AppCompatActivity {
     public void stopService(){
         Intent serviceIntent = new Intent(this, NotifService.class);
         stopService(serviceIntent);
+    }
+    @Override
+    protected void onStop() {
+        super.onStop();
+        compositeDisposable.clear();
     }
 }

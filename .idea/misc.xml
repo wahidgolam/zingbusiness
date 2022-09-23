@@ -3,6 +3,7 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="../../../../layout/custom_preview.xml" value="0.1" />
         <entry key="app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.138" />
         <entry key="app/src/main/res/drawable-v24/ic_notif.xml" value="0.138" />
         <entry key="app/src/main/res/drawable/alert.xml" value="0.125" />
@@ -14,14 +15,14 @@
         <entry key="app/src/main/res/drawable/round_button_unactive.xml" value="0.138" />
         <entry key="app/src/main/res/layout/activity_dispatch_screen.xml" value="0.23052536231884058" />
         <entry key="app/src/main/res/layout/activity_earning_screen.xml" value="0.23052536231884058" />
-        <entry key="app/src/main/res/layout/activity_homescreen.xml" value="0.21453857421875" />
+        <entry key="app/src/main/res/layout/activity_homescreen.xml" value="0.16096191406250002" />
         <entry key="app/src/main/res/layout/activity_login.xml" value="0.19610507246376813" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.23052536231884058" />
         <entry key="app/src/main/res/layout/activity_order_details.xml" value="0.23052536231884058" />
         <entry key="app/src/main/res/layout/activity_settings.xml" value="0.23052536231884058" />
         <entry key="app/src/main/res/layout/earning_rv_view.xml" value="0.32926177978515636" />
         <entry key="app/src/main/res/layout/item_rv_view.xml" value="0.23052536231884058" />
-        <entry key="app/src/main/res/layout/loading_dialog.xml" value="0.19610507246376813" />
+        <entry key="app/src/main/res/layout/loading_dialog.xml" value="0.23991305586220568" />
         <entry key="app/src/main/res/layout/order_rv_view.xml" value="0.2891632080078126" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.138" />
       </map>

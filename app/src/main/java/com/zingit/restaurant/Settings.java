@@ -119,6 +119,7 @@ public class Settings extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 //updateLocally
+                //adapter.notifyDataSetChanged();
                 Toast.makeText(Settings.this, "Updated successfully", Toast.LENGTH_SHORT).show();
             }
         });

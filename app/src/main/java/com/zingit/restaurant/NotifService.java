@@ -4,6 +4,7 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.IBinder;
@@ -58,15 +59,23 @@ public class NotifService extends Service {
         return START_NOT_STICKY;
     }
     public void showNotification(Order order){
+        final MediaPlayer mp = MediaPlayer.create(this, R.raw.notifsound);
+        mp.start();
+        mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            public void onCompletion(MediaPlayer mp) {
+                mp.release();
+            }
+        });
+
         Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        Intent intent = new Intent(this, Homescreen.class);
+        Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "008")
                 .setSmallIcon(R.drawable.ic_notif)
                 .setContentTitle(order.getItemName()+" x"+order.getQuantity())
                 .setContentText("New order request")
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setSound(alarmSound)
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true);
@@ -88,9 +97,14 @@ public class NotifService extends Service {
                     for (DocumentChange dc : snapshots.getDocumentChanges()) {
                         switch (dc.getType()) {
                             case ADDED:
-                                Log.d("NOTIFFF", "New order: " + dc.getDocument().getData());
-                                Order order = dc.getDocument().toObject(Order.class);
-                                showNotification(order);
+                                Log.d("NOTIFICATION", "New order: " + dc.getDocument().getData());
+                                try {
+                                    Order order = dc.getDocument().toObject(Order.class);
+                                    showNotification(order);
+                                }
+                                catch (Exception e){
+                                    e.printStackTrace();
+                                }
                                 break;
                             case MODIFIED:
                                 Log.d("Modified", "Modified order: " + dc.getDocument().getData());

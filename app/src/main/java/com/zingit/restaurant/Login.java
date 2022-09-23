@@ -106,13 +106,15 @@ public class Login extends AppCompatActivity {
                     // Sign in success, update UI with the signed-in user's information
                     Log.d("FirebaseAuth", "signInWithCredential:success");
                     FirebaseUser user = mAuth.getCurrentUser();
-                    DocumentReference userConcerned = db.collection("studentUser").document(user.getUid());
+                    Log.d("Debug1", user.getUid());
+                    DocumentReference userConcerned = db.collection("ownerUser").document(user.getUid());
                     userConcerned.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                         @Override
                         public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                             if (task.isSuccessful()) {
                                 DocumentSnapshot document = task.getResult();
                                 if (document.exists()) {
+                                    Log.d("DEBUG!", "doc exists");
                                     //set Data-holder
                                     OwnerUser ownerUser = document.toObject(OwnerUser.class);
                                     Dataholder.ownerUser = ownerUser;
@@ -139,6 +141,7 @@ public class Login extends AppCompatActivity {
         });
     }
     public void createUser(){
+        Log.d("DEBUG!", "user created");
         FirebaseUser user = mAuth.getCurrentUser();
         assert user != null;
         String email = user.getEmail();

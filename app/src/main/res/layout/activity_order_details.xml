@@ -131,10 +131,26 @@
             android:text="Order paid"
             android:fontFamily="@font/urbanist_medium"
             android:textSize="14dp"/>
+
+        <Button
+            android:id="@+id/prepared_button"
+            android:onClick="prepared"
+            android:layout_marginTop="148dp"
+            android:layout_width="match_parent"
+            android:layout_marginHorizontal="24dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:background="@drawable/button_filled"
+            android:backgroundTint="@null"
+            android:fontFamily="@font/urbanist_semibold"
+            android:text="Prepared. Dispatch"
+            android:textAllCaps="false"
+            android:textSize="14dp"
+            android:letterSpacing="0.01"/>
         <Button
             android:id="@+id/not_prepared_button"
             android:onClick="notPrepared"
-            android:layout_marginTop="148dp"
+            android:layout_marginTop="16dp"
             android:layout_width="match_parent"
             android:layout_marginHorizontal="24dp"
             android:layout_height="wrap_content"
@@ -145,21 +161,6 @@
             android:text="Not prepared"
             android:textAllCaps="false"
             android:textColor="@color/dark_orange"
-            android:textSize="14dp"
-            android:letterSpacing="0.01"/>
-        <Button
-            android:id="@+id/prepared_button"
-            android:onClick="prepared"
-            android:layout_marginTop="16dp"
-            android:layout_width="match_parent"
-            android:layout_marginHorizontal="24dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:background="@drawable/button_filled"
-            android:backgroundTint="@null"
-            android:fontFamily="@font/urbanist_semibold"
-            android:text="Prepared. Dispatch"
-            android:textAllCaps="false"
             android:textSize="14dp"
             android:letterSpacing="0.01"/>
 

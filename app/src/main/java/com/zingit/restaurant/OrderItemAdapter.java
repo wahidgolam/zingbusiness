@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -22,6 +23,7 @@ import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.firebase.Timestamp;
@@ -127,6 +129,9 @@ public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.View
         }
 
         //render basic data
+        if(order.getItemImage().startsWith("http")) {
+            Glide.with(context).load(order.getItemImage()).into(holder.itemImage);
+        }
         String itemDetails = order.getItemName()+ " x"+ order.getQuantity();
         Timestamp placedTimestamp = order.getPlacedTime();
         Date date = new Date();
@@ -270,7 +275,10 @@ public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.View
         }
     }
     public String timerText(long seconds){
-        return "" + seconds / 60 + ":" + ((seconds % 60 < 10) ? "0" + seconds % 60 : seconds % 60);
+        if(seconds>0)
+            return "" + seconds / 60 + ":" + ((seconds % 60 < 10) ? "0" + seconds % 60 : seconds % 60);
+        else
+            return "-" + Math.abs(seconds) / 60 + ":" + ((Math.abs(seconds) % 60 < 10) ? "0" + Math.abs(seconds) % 60 : Math.abs(seconds) % 60);
     }
     public void changeStyle(TextView text, TextView subText, MaterialCardView card){
         card.setCardBackgroundColor(ContextCompat.getColor(context, R.color.dark_orange));
@@ -295,6 +303,7 @@ public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.View
         TextView orderTotal;
         TextView statusText;
         CardView orderCard;
+        ImageView itemImage;
 
         LinearLayout request1;
         LinearLayout request2;
@@ -329,6 +338,7 @@ public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.View
             timerText = itemView.findViewById(R.id.timer);
             statusText = itemView.findViewById(R.id.status_text);
             orderTotal = itemView.findViewById(R.id.order_total);
+            itemImage = itemView.findViewById(R.id.item_image);
 
             request1 = itemView.findViewById(R.id.request_1);
             request2 = itemView.findViewById(R.id.request_2);

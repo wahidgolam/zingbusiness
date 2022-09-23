@@ -1,7 +1,6 @@
 package com.zingit.restaurant;
 
 import com.google.firebase.Timestamp;
-import java.util.ArrayList;
 
 public class Order {
 
@@ -11,7 +10,7 @@ public class Order {
 
     private String outletID;
     private String studentID;
-    private String paymentID;
+    private String paymentOrderID;
 
     private Timestamp zingTime;
     private Timestamp placedTime;
@@ -97,8 +96,8 @@ public class Order {
         return studentID;
     }
 
-    public String getPaymentID() {
-        return paymentID;
+    public String getPaymentOrderID() {
+        return paymentOrderID;
     }
 
     public int getPaymentStatus() {
@@ -141,8 +140,8 @@ public class Order {
         this.zingTime = zingTime;
     }
 
-    public void setPaymentID(String paymentID) {
-        this.paymentID = paymentID;
+    public void setPaymentOrderID(String paymentOrderID) {
+        this.paymentOrderID = paymentOrderID;
     }
 
     public void setPaymentStatus(int paymentStatus) {
@@ -167,5 +166,13 @@ public class Order {
 
     public void setReactionTime(Timestamp reactionTime) {
         this.reactionTime = reactionTime;
+    }
+
+    public void setPreparedTime(Timestamp preparedTime) {
+        this.preparedTime = preparedTime;
+    }
+
+    public void setPlacedTime(Timestamp placedTime) {
+        this.placedTime = placedTime;
     }
 }
