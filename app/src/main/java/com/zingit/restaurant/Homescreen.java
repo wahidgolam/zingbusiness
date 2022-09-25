@@ -23,6 +23,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.toolbox.StringRequest;
 import com.google.android.gms.nearby.messages.Message;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -59,6 +61,8 @@ import io.reactivex.schedulers.Schedulers;
 
 public class Homescreen extends AppCompatActivity {
 
+   // String url = https://us-central1-zing-user.cloudfunctions.net/sendFCM/send?token="token"&title="title"&body="body"  FCM Token
+    String url = "https://us-central1-zing-user.cloudfunctions.net/sendFCM/send?token=";
     String outletID;
     ArrayList<Order> orderList;
 
@@ -489,6 +493,17 @@ public class Homescreen extends AppCompatActivity {
         order.setZingTime(zingTime);
         order.setReactionTime(acceptTimestamp);
         order.setStatusCode(statusCode);
+
+        //Getting FCM Token
+        db.collection("order").document(order.getOrderID()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                Order order1 = task.getResult().toObject(Order.class);
+                Dataholder.studentID = order1.getStudentID();
+                getFCMToken();
+            }
+        });
+
         db.collection("order").document(order.getOrderID())
                 .update(
                         "statusCode", 2,
@@ -497,6 +512,7 @@ public class Homescreen extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 Toast.makeText(Homescreen.this, "You have accepted the order of "+order.getQuantity()+" "+order.getItemName(), Toast.LENGTH_LONG).show();
+                SendingNotification("Order Accepted","Your order of" + order.getQuantity() + " " + order.getItemName() + "is accepted",Dataholder.FCMToken);
                 updateOrder(order);
                 orderItemAdapter.notifyDataSetChanged();
                 loadingDialog2.dismissDialog();
@@ -811,9 +827,40 @@ public class Homescreen extends AppCompatActivity {
         Intent serviceIntent = new Intent(this, NotifService.class);
         stopService(serviceIntent);
     }
+    public void getFCMToken()
+    {
+        db.collection("studentUser").document(Dataholder.studentID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                try{
+                    StudentWithFCM studentWithFCM = task.getResult().toObject(StudentWithFCM.class);
+                    Dataholder.FCMToken = studentWithFCM.getFCMToken();
+                }
+                catch (Exception e)
+                {
+                    StudentWithoutFCM studentWithoutFCM = task.getResult().toObject(StudentWithoutFCM.class);
+                    Dataholder.FCMToken = "";
+                }
+            }
+        });
+    }
     @Override
     protected void onStop() {
         super.onStop();
         compositeDisposable.clear();
+    }
+
+    public void SendingNotification(String Title,String Body,String FCMToken)
+    {
+        if(!FCMToken.equals("")) {
+            url = url + FCMToken + "&title=" + Title + "&body=" +Body;
+            Log.e("url",url);
+                    StringRequest stringRequest = new StringRequest(Request.Method.POST,url,response -> {
+                        Toast.makeText(this, "Success", Toast.LENGTH_SHORT).show();},
+
+                    error -> {Toast.makeText(this, "Failure", Toast.LENGTH_SHORT).show();}
+
+                    );
+        }
     }
 }
