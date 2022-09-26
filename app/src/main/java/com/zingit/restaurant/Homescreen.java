@@ -23,8 +23,11 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
+import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.nearby.messages.Message;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -44,7 +47,10 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+import com.zingit.restaurant.model.FcmToken;
 import com.zingit.restaurant.model.RefundToken;
+import com.zingit.restaurant.remote.FCMRetrofitClient;
+import com.zingit.restaurant.remote.FcmCloudFunction;
 import com.zingit.restaurant.remote.RefundCloudFunction;
 import com.zingit.restaurant.remote.RefundRetrofitClient;
 
@@ -53,6 +59,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Map;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -88,6 +95,8 @@ public class Homescreen extends AppCompatActivity {
     RelativeLayout background;
     Intent serviceIntent;
     RefundCloudFunction refundCloudFunction;
+    FcmCloudFunction fcmCloudFunction;
+
     CompositeDisposable compositeDisposable;
     Outlet currentOutlet;
     OrderItemAdapter orderItemAdapter;
@@ -96,11 +105,13 @@ public class Homescreen extends AppCompatActivity {
     MaterialCardView dispatch;
     FloatingActionButton settings;
     FloatingActionButton earnings;
+    String FCMToken = "";
 
 
     int request_new = 0;
     int active_new = 0;
     int history_new = 0;
+    RequestQueue requestQueue;
 
     int op = 0;
     //0 -> request
@@ -138,6 +149,7 @@ public class Homescreen extends AppCompatActivity {
         tabs = findViewById(R.id.tabs);
         compositeDisposable = new CompositeDisposable();
         refundCloudFunction = RefundRetrofitClient.getInstance().create(RefundCloudFunction.class);
+        fcmCloudFunction = FCMRetrofitClient.getRetrofitInstance().create(FcmCloudFunction.class);
 
         //creating notification channel
         createNotificationChannel();
@@ -246,7 +258,7 @@ public class Homescreen extends AppCompatActivity {
             opDetails = "Order History";
         opHeading.setText(opDetails);
         if (orderList.isEmpty()){
-            tabs.setVisibility(View.GONE);
+            tabs.setVisibility(View.VISIBLE);
             orderRV.setVisibility(View.GONE);
             tabDetails.setVisibility(View.GONE);
             emptyOrderView.setVisibility(View.VISIBLE);
@@ -261,7 +273,7 @@ public class Homescreen extends AppCompatActivity {
     public void fetchAllOrders(){
         //collect statusCode 2,3,4 -> active, prepared and history
 
-        Query query = db.collection("order").whereEqualTo("outletID", outletID).whereEqualTo("statusCode", 4).whereGreaterThan("placedTime", startOfDay()).whereLessThan("placedTime", endOfDay()).orderBy("placedTime", Query.Direction.DESCENDING);
+        Query query = db.collection("order").whereEqualTo("outletID", outletID).whereEqualTo("statusCode",4).whereGreaterThan("placedTime", startOfDay()).whereLessThan("placedTime", endOfDay()).orderBy("placedTime", Query.Direction.DESCENDING);
         query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -447,6 +459,8 @@ public class Homescreen extends AppCompatActivity {
 
     public void acceptOrder(Order order, int time){
 
+        getFCMToken(order.getStudentID(),"Order Accepted","Your order of " + order.getQuantity() + " " + order.getItemName() + " is Accepted");
+
         active_new++;
         request_new--;
         showNewOrders();
@@ -495,14 +509,7 @@ public class Homescreen extends AppCompatActivity {
         order.setStatusCode(statusCode);
 
         //Getting FCM Token
-        db.collection("order").document(order.getOrderID()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                Order order1 = task.getResult().toObject(Order.class);
-                Dataholder.studentID = order1.getStudentID();
-                getFCMToken();
-            }
-        });
+
 
         db.collection("order").document(order.getOrderID())
                 .update(
@@ -517,14 +524,12 @@ public class Homescreen extends AppCompatActivity {
                 orderItemAdapter.notifyDataSetChanged();
                 loadingDialog2.dismissDialog();
                 addEarning(order);
-                sendNotification();
+
 
             }
         });
     }
-    public void sendNotification(){
 
-    }
     public void updateZingTime(String zingTimeString){
         db.collection("outlet").document(Dataholder.outlet.getId())
                 .update(
@@ -583,6 +588,7 @@ public class Homescreen extends AppCompatActivity {
 
         Date date = new Date();
         Timestamp denyTimestamp = new Timestamp(date);
+        getFCMToken(order.getStudentID(),"Order Denied","Your order of " + order.getQuantity() + " " + order.getItemName() + " has been denied");
 
         int statusCode = 0;
         order.setReactionTime(denyTimestamp);
@@ -617,23 +623,25 @@ public class Homescreen extends AppCompatActivity {
                             loadingDialog2.dismissDialog();
                             db.collection("order").document(order.getOrderID())
                                     .update(
-                                            "statusCode",0,
+                                            "statusCode",-1,
                                             "refundID", refundToken.getCf_refund_id()).addOnCompleteListener(new OnCompleteListener<Void>() {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
-                                            Toast.makeText(Homescreen.this, "Refund successful", Toast.LENGTH_SHORT).show();
+                                            //Toast.makeText(Homescreen.this, "Refund successful", Toast.LENGTH_SHORT).show();
+                                            getFCMToken(order.getStudentID(),"Order Denied","Your order of " + order.getQuantity() + " " + order.getItemName() + " has been denied, refund initiated");
+
                                         }
                                     });
                         }
                         else{
-                            Toast.makeText(Homescreen.this, "Could not initiate refund for the last order. Contact support", Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(Homescreen.this, "Could not initiate refund for the last order. Contact support", Toast.LENGTH_SHORT).show();
                             loadingDialog2.dismissDialog();
                         }
                     }
                 }, new Consumer<Throwable>() {
                     @Override
                     public void accept(Throwable throwable) throws Exception {
-                        Toast.makeText(Homescreen.this, "error: "+throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(Homescreen.this, "error: "+throwable.getMessage(), Toast.LENGTH_SHORT).show();
                         //Toast.makeText(Homescreen.this, "Could not initiate refund for the last order. Contact support", Toast.LENGTH_SHORT).show();
                         Log.d("Initiating Payment: Error", throwable.getMessage());
                         loadingDialog2.dismissDialog();
@@ -645,6 +653,8 @@ public class Homescreen extends AppCompatActivity {
         showNewOrders();
         LoadingDialog loadingDialog2 = new LoadingDialog(Homescreen.this, "Updating order status");
         loadingDialog2.startLoadingDialog();
+        getFCMToken(order.getStudentID(),"Food is Prepared","Your order of " + order.getQuantity() + " ac" + order.getItemName() + " is ready");
+        //SendingNotification("Food is Prepared","Your order ",FCMToken);
 
         Date date = new Date();
         Timestamp preparedTimestamp = new Timestamp(date);
@@ -658,6 +668,7 @@ public class Homescreen extends AppCompatActivity {
                         "preparedTime", preparedTimestamp).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
+                SendingNotification("Food","IsPrepared",Dataholder.FCMToken);
                 updateOrder(order);
                 orderList.sort(Comparator.comparing(Order::getZingTime));
                 orderList.sort(Comparator.comparing(Order::getStatusCode));
@@ -785,7 +796,7 @@ public class Homescreen extends AppCompatActivity {
         // toast a message as "cancelled"
         if (intentResult != null) {
             if (intentResult.getContents() == null) {
-                Toast.makeText(getBaseContext(), "Cancelled", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getBaseContext(), "Cancelled", Toast.LENGTH_SHORT).show();
             } else {
                 // if the intentResult is not null we'll set
                 // the content and format of scan message
@@ -827,20 +838,23 @@ public class Homescreen extends AppCompatActivity {
         Intent serviceIntent = new Intent(this, NotifService.class);
         stopService(serviceIntent);
     }
-    public void getFCMToken()
+    public void getFCMToken(String StudentUserId,String title,String body)
     {
-        db.collection("studentUser").document(Dataholder.studentID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+        String fcm;
+        db.collection("studentUser").document(StudentUserId).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 try{
                     StudentWithFCM studentWithFCM = task.getResult().toObject(StudentWithFCM.class);
-                    Dataholder.FCMToken = studentWithFCM.getFCMToken();
+                    FCMToken = studentWithFCM.getFCMToken();
+                    SendingNotification(title,body,FCMToken);
                 }
                 catch (Exception e)
                 {
                     StudentWithoutFCM studentWithoutFCM = task.getResult().toObject(StudentWithoutFCM.class);
-                    Dataholder.FCMToken = "";
+                    FCMToken =  "";
                 }
+
             }
         });
     }
@@ -850,17 +864,69 @@ public class Homescreen extends AppCompatActivity {
         compositeDisposable.clear();
     }
 
-    public void SendingNotification(String Title,String Body,String FCMToken)
+    public void SendingNotification(String title,String body,String FCMToken)
     {
+        /*Body = removeSpaces(Body);
+        Title = removeSpaces(Title);
         if(!FCMToken.equals("")) {
-            url = url + FCMToken + "&title=" + Title + "&body=" +Body;
+            url = url + FCMToken + "&title=" + Title + "&body="+Body;
             Log.e("url",url);
                     StringRequest stringRequest = new StringRequest(Request.Method.POST,url,response -> {
                         Toast.makeText(this, "Success", Toast.LENGTH_SHORT).show();},
 
-                    error -> {Toast.makeText(this, "Failure", Toast.LENGTH_SHORT).show();}
+                    error -> Toast.makeText(this, "Failure", Toast.LENGTH_SHORT).show());{
 
-                    );
+
+
+                    }
+
+
+                    requestQueue = Volley.newRequestQueue(Homescreen.this);
+                    requestQueue.add(stringRequest);
+
+        }*/
+        if(!FCMToken.equals("")) {
+            compositeDisposable.add(fcmCloudFunction.sendNotification(FCMToken, title, body).subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Consumer<FcmToken>() {
+                        @Override
+                        public void accept(FcmToken fcmToken) throws Exception {
+                            if (fcmToken.getMulticast_id() != null) {
+                                //refund successful
+                                //refund successful
+
+                               // Toast.makeText(Homescreen.this, "Successful", Toast.LENGTH_SHORT).show();
+                            } else {
+                               // Toast.makeText(Homescreen.this, "Failure", Toast.LENGTH_SHORT).show();
+                                //loadingDialog2.dismissDialog();
+                            }
+                        }
+                    }, new Consumer<Throwable>() {
+                        @Override
+                        public void accept(Throwable throwable) throws Exception {
+                           // Toast.makeText(Homescreen.this, "error: " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(Homescreen.this, "Could not initiate refund for the last order. Contact support", Toast.LENGTH_SHORT).show();
+                            Log.d("Initiating Payment: Error", throwable.getMessage());
+
+                        }
+                    }));
         }
+    }
+    public String removeSpaces(String word)
+    {
+        String word1="";
+        for(int i=0;i<word.length();i++)
+        {
+            char c = word.charAt(i);
+            if(c==' ')
+            {
+                word1 = word1 + "%20";
+            }
+            else{
+                word1 = word1 + c;
+            }
+
+        }
+        return word1;
     }
 }

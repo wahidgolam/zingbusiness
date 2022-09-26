@@ -1,9 +1,12 @@
 package com.zingit.restaurant;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.media.AudioAttributes;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -24,6 +27,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 public class NotifService extends Service {
 
@@ -71,16 +75,36 @@ public class NotifService extends Service {
         Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "008")
+        /*NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "024")
                 .setSmallIcon(R.drawable.ic_notif)
                 .setContentTitle(order.getItemName()+" x"+order.getQuantity())
                 .setContentText("New order request")
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setSound(alarmSound)
                 .setContentIntent(pendingIntent)
-                .setAutoCancel(true);
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-        notificationManager.notify(007, builder.build());
+                .setAutoCancel(true);*/
+
+        Uri soundUri = Uri.parse("android.resource://" + getApplicationContext()
+                .getPackageName() + "/" + R.raw.notifsound);
+
+        NotificationCompat.Builder notificationBuilder =
+                new NotificationCompat.Builder(this, "024")
+                        .setSmallIcon(R.drawable.ic_notif)
+                        .setContentTitle(order.getItemName()+" x"+order.getQuantity())
+                        .setContentText("New order request")
+                        .setVibrate(new long[]{500, 500})
+                        .setAutoCancel(true)
+                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                        .setSound(soundUri)
+                        .setFullScreenIntent(pendingIntent, true)
+                        .setChannelId("024");
+
+        NotificationManagerCompat notificationManager =
+                NotificationManagerCompat.from(this);
+        createNotificationChannel();
+        notificationManager.notify(getNextUniqueRandomNumber() /* ID of notification */, notificationBuilder.build());
+
+
     }
     public void fetchRequests(){
         //fetching requests
@@ -117,6 +141,12 @@ public class NotifService extends Service {
             }
         });
     }
+
+    private static int number = 10000;
+    public int getNextUniqueRandomNumber() {
+        return number++;
+    }
+
     public Timestamp startOfDay() {
         Date date = new Date();
         Timestamp nowTime = new Timestamp(date);
@@ -150,5 +180,39 @@ public class NotifService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+    }
+
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+
+        Uri soundUri = Uri.parse("android.resource://" + getApplicationContext()
+                .getPackageName() + "/" + R.raw.notifsound);
+
+        NotificationManager mNotificationManager = getSystemService(NotificationManager.class);
+
+        List<NotificationChannel> channelList = mNotificationManager.getNotificationChannels();
+        for(int i =0; i<channelList.size();i++){
+            mNotificationManager.deleteNotificationChannel(channelList.get(i).getId());
+        }
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+            NotificationChannel notificationChannel = new NotificationChannel("024", "Zing Bussiness", importance);
+            notificationChannel.enableLights(true);
+            notificationChannel.enableVibration(true);
+            notificationChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
+
+            if(soundUri != null){
+                AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .setUsage(AudioAttributes.USAGE_ALARM)
+                        .build();
+                notificationChannel.setSound(soundUri,audioAttributes);
+            }
+
+            assert mNotificationManager != null;
+            mNotificationManager.createNotificationChannel(notificationChannel);
+        }
     }
 }

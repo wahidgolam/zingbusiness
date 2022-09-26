@@ -7,5 +7,5 @@ public class Dataholder {
     public static ArrayList<Order> orderList;
     public static Outlet outlet;
     public static String studentID;
-    public static String FCMToken;
+    public static String FCMToken="";
 }
