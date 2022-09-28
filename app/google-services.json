@@ -1,10 +1,48 @@
 {
   "project_info": {
     "project_number": "141551690793",
+    "firebase_url": "https://zing-user-default-rtdb.firebaseio.com",
     "project_id": "zing-user",
     "storage_bucket": "zing-user.appspot.com"
   },
   "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:141551690793:android:2c9165a3d0e38e3c71a838",
+        "android_client_info": {
+          "package_name": "com.example.zingsuperadmin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "141551690793-0ah4g4t65ps69h8143quk095aeh0cfta.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.zingsuperadmin",
+            "certificate_hash": "efdf00cfa40989b937e80c4e0ddc4e0a750a214c"
+          }
+        },
+        {
+          "client_id": "141551690793-v2ju2m85iigltgs57ip0niipmvbusmbt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBwkZHK2fkMu9QDMagj1mkkA2rdw04wo40"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "141551690793-97kgrcsvjbek61njs40cgqj695ljmmtq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
     {
       "client_info": {
         "mobilesdk_app_id": "1:141551690793:android:c80abf1f45d7adda71a838",
@@ -22,6 +60,14 @@
           }
         },
         {
+          "client_id": "141551690793-5iiihosen4t8lhc3071nq0pvsrjtfesj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.zingit.restaurant",
+            "certificate_hash": "efdf00cfa40989b937e80c4e0ddc4e0a750a214c"
+          }
+        },
+        {
           "client_id": "141551690793-v2ju2m85iigltgs57ip0niipmvbusmbt.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -35,7 +81,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "141551690793-v2ju2m85iigltgs57ip0niipmvbusmbt.apps.googleusercontent.com",
+              "client_id": "141551690793-97kgrcsvjbek61njs40cgqj695ljmmtq.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
@@ -50,6 +96,22 @@
         }
       },
       "oauth_client": [
+        {
+          "client_id": "141551690793-376cld5pd9fbltdla6b96gtn9cqv0hop.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.zingit.user",
+            "certificate_hash": "aa6c2f6da4bbef1851c829f1568f6e2521afc081"
+          }
+        },
+        {
+          "client_id": "141551690793-p311874grhm4tvur899fgj1tiv97s8sf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.zingit.user",
+            "certificate_hash": "efdf00cfa40989b937e80c4e0ddc4e0a750a214c"
+          }
+        },
         {
           "client_id": "141551690793-voji1endd5td1n7oget66i0imuq4f119.apps.googleusercontent.com",
           "client_type": 1,
@@ -72,7 +134,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "141551690793-v2ju2m85iigltgs57ip0niipmvbusmbt.apps.googleusercontent.com",
+              "client_id": "141551690793-97kgrcsvjbek61njs40cgqj695ljmmtq.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

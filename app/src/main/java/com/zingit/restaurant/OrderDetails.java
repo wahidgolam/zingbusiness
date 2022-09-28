@@ -6,11 +6,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.airbnb.lottie.L;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
@@ -48,20 +50,33 @@ public class OrderDetails extends AppCompatActivity {
         Intent intent = getIntent();
         orderId = intent.getStringExtra("orderId");
         if(orderId!=null){
-            order = getOrderDetails();
-            setupUI();
+            if(Dataholder.orderList.size()==0)
+            {
+                fetchFromDatabase();
+            }
+            else {
+                Toast.makeText(this, "Fetch from dataholder", Toast.LENGTH_SHORT).show();
+                Log.e("OrderId",orderId);
+                order = getOrderDetails();
+                setupUI();
+            }
         }
         if(order==null){
+            Toast.makeText(this, "Fetch from database", Toast.LENGTH_SHORT).show();
             fetchFromDatabase();
         }
     }
     public void fetchFromDatabase(){
+        LoadingDialog loadingDialog = new LoadingDialog(this, "Loading");
+        Toast.makeText(this, "OrderId", Toast.LENGTH_SHORT).show();
         db.collection("order").document(orderId).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if(task.isSuccessful()) {
                     order = task.getResult().toObject(Order.class);
+                    loadingDialog.dismissDialog();
                     setupUI();
+
                 }
                 else{
                     setupUI();
@@ -77,6 +92,7 @@ public class OrderDetails extends AppCompatActivity {
             itemDetails = order.getItemName() + " x" + order.getQuantity();
             outletNameOrderID.setText(outletDetails);
             itemNameQuantity.setText(itemDetails);
+
 
             if(order.getStatusCode()==3){
                 Timestamp zingTimestamp = order.getZingTime();
@@ -108,6 +124,7 @@ public class OrderDetails extends AppCompatActivity {
                 prepared.setVisibility(View.GONE);
                 status2.setText("Order has been already collected");
                 msgText.setText("Do not dispatch");
+                Toast.makeText(this, "Outlet" + outletDetails + " item " + itemDetails,  Toast.LENGTH_SHORT).show();
             }
         }
         else {
@@ -122,15 +139,29 @@ public class OrderDetails extends AppCompatActivity {
         }
     }
     public Order getOrderDetails(){
+        LoadingDialog loadingDialog2 = new LoadingDialog(OrderDetails.this, "Loading ");
+        loadingDialog2.startLoadingDialog();
+
         Order order = new Order();
-        for(int i = 0; i<Dataholder.orderList.size(); i++){
-            if(Dataholder.orderList.get(i).getOrderID().equals(orderId)){
-                order = Dataholder.orderList.get(i);
-                break;
+        int i;
+        Toast.makeText(this, "Orderlist Size " + Dataholder.orderList.size() , Toast.LENGTH_SHORT).show();
+
+
+            for (i = 0; i < Dataholder.orderList.size(); i++) {
+                if (Dataholder.orderList.get(i).getOrderID().equals(orderId)) {
+                    Toast.makeText(getApplicationContext(), "i " + i, Toast.LENGTH_SHORT).show();
+                    order = Dataholder.orderList.get(i);
+                    Toast.makeText(getApplicationContext(), "orderName " + order.getItemName(), Toast.LENGTH_SHORT).show();
+                    break;
+                }
+
             }
+            //Toast.makeText(getApplicationContext(), "i " +i, Toast.LENGTH_SHORT).show();
+            loadingDialog2.dismissDialog();
+            return order;
         }
-        return order;
-    }
+
+
     public void prepared(View view){
         //what if already dispatched
         //show how much late they have come

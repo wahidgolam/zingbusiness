@@ -3,6 +3,7 @@ package com.zingit.restaurant;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -16,7 +17,9 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
@@ -33,7 +36,7 @@ import java.util.Objects;
 
 public class Login extends AppCompatActivity {
 
-    private static final int RC_SIGN_IN = 100;
+    private static final int RC_SIGN_IN = 101;
     GoogleSignInClient mGoogleSignInClient;
     FirebaseAuth mAuth;
     FirebaseFirestore db;
@@ -49,6 +52,11 @@ public class Login extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.firebase_web_client))
+                .requestEmail()
+                .build();
+        GoogleSignInOptions gso1 = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestScopes(new Scope(Scopes.PLUS_LOGIN))
+                .requestScopes(new Scope(Scopes.PLUS_ME))
                 .requestEmail()
                 .build();
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
@@ -85,15 +93,15 @@ public class Login extends AppCompatActivity {
                     }, 100);
                 }
             } catch (ApiException e) {
-                Log.d("Google Authentication Error", "signInResult:failed code=" + e.getStatusCode());
+                Log.d("Google Authentication Error", "signInResult:failed" +  e.getLocalizedMessage());
                 //Display failure information to user
-                Toast.makeText(Login.this, "Authentication failed", Toast.LENGTH_SHORT).show();
+                Toast.makeText(Login.this, "" + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
             }
         }
         else{
             Log.d("Google Authentication Unsuccessful", "Sign-in unsuccessful");
             //Display failure information to user
-            Toast.makeText(Login.this, "Authentication failed", Toast.LENGTH_SHORT).show();
+            Toast.makeText(Login.this, "Authentication failed " + completedTask.getException(), Toast.LENGTH_SHORT).show();
         }
 
     }
@@ -135,7 +143,7 @@ public class Login extends AppCompatActivity {
                     // If sign in fails, display a message to the user.
                     Log.w("FirebaseAuth", "signInWithCredential:failure", task.getException());
                     //Display failure information to user
-                    Toast.makeText(Login.this, "Authentication failed", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(Login.this, "" + task.getException(), Toast.LENGTH_SHORT).show();
                 }
             }
         });

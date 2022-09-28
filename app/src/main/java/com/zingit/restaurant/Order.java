@@ -28,6 +28,16 @@ public class Order {
     int otp;
     private long totalAmount;
 
+    public long getDiscountedAmount() {
+        return discountedAmount;
+    }
+
+    public void setDiscountedAmount(long discountedAmount) {
+        this.discountedAmount = discountedAmount;
+    }
+
+    private long discountedAmount;
+
     //status code for orders
     //placed - 1
     //accepted - 2

@@ -207,8 +207,14 @@ public class Homescreen extends AppCompatActivity {
                             Dataholder.outlet = currentOutlet;
                             serviceIntent = new Intent(getApplicationContext(), NotifService.class);
                             if(currentOutlet.getOpenStatus().equals("OPEN")) {
-                                serviceIntent.putExtra("outletID", currentOutlet.getId());
-                                ContextCompat.startForegroundService(getApplicationContext(), serviceIntent);
+                                try {
+                                    serviceIntent.putExtra("outletID", currentOutlet.getId());
+                                    ContextCompat.startForegroundService(getApplicationContext(), serviceIntent);
+                                }
+                                catch(Exception e)
+                                {
+                                    Toast.makeText(Homescreen.this, "" + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                                }
                             }
                             else{
                                 stopService();
@@ -892,6 +898,7 @@ public class Homescreen extends AppCompatActivity {
                         @Override
                         public void accept(FcmToken fcmToken) throws Exception {
                             if (fcmToken.getMulticast_id() != null) {
+                                Log.e("Title",title + "Working");
                                 //refund successful
                                 //refund successful
 
