@@ -31,7 +31,7 @@ import java.util.ArrayList;
 public class ItemAdapter extends
         RecyclerView.Adapter<ItemAdapter.ViewHolder> {
 
-    private ArrayList<Item> itemList;
+    public ArrayList<Item> itemList;
     Context context;
 
     public ItemAdapter(ArrayList<Item> itemList) {
@@ -58,24 +58,15 @@ public class ItemAdapter extends
         //handle is available
         TextView itemName = holder.itemName;
         TextView itemPrice = holder.itemPrice;
-        ImageView itemImage = holder.itemImage;
-        ImageView vegImage = holder.vegImage;
         SwitchMaterial availableSwitch = holder.availableSwitch;
         RelativeLayout itemRVLayout = holder.itemRVLayout;
 
         //render basic data
-        if(item.getItemImage().startsWith("http")) {
-            Glide.with(context).load(item.getItemImage()).into(itemImage);
-        }
-        String priceDisplayText = "₹"+item.getPrice()+".00";
+
+        String priceDisplayText = "₹ "+item.getPrice()+".00";
         itemName.setText(item.getName());
         itemPrice.setText(priceDisplayText);
-        if(item.isVegOrNot()) {
-            vegImage.setImageResource(R.drawable.veg);
-        }
-        else{
-            vegImage.setImageResource(R.drawable.nonveg);
-        }
+
         availableSwitch.setChecked(item.isAvailableOrNot());
         availableSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -89,6 +80,13 @@ public class ItemAdapter extends
     @Override
     public int getItemCount() {
         return itemList.size();
+    }
+
+    public void filterList(ArrayList<Item> items)
+    {
+
+        itemList = items;
+        notifyDataSetChanged();
     }
 
     // Provide a direct reference to each of the views within a data item
@@ -110,8 +108,8 @@ public class ItemAdapter extends
             super(itemView);
             itemName = (TextView) itemView.findViewById(R.id.item_name);
             itemPrice = (TextView) itemView.findViewById(R.id.item_price);
-            itemImage = (ImageView) itemView.findViewById(R.id.item_image);
-            vegImage = (ImageView) itemView.findViewById(R.id.veg_image);
+            //itemImage = (ImageView) itemView.findViewById(R.id.item_image);
+            //vegImage = (ImageView) itemView.findViewById(R.id.veg_image);
             availableSwitch = itemView.findViewById(R.id.available_switch);
             itemRVLayout = (RelativeLayout) itemView.findViewById(R.id.item_rv_layout);
 

@@ -9,15 +9,20 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.CompoundButton;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.switchmaterial.SwitchMaterial;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -34,45 +39,117 @@ public class Settings extends AppCompatActivity {
     ArrayList<Item> itemList;
     LoadingDialog loadingDialog;
     ItemAdapter adapter;
+    EditText searchItems;
+    ImageView backBtn;
+    ImageView earnings,home,settings;
+    ImageView logout;
+    FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
-        outletName = findViewById(R.id.outlet_name);
-        outletDesc = findViewById(R.id.outlet_desc);
-        outletStatus = findViewById(R.id.outlet_status);
-        openSwitch = findViewById(R.id.open_switch);
-        itemRV = findViewById(R.id.itemRV);
+
+        //outletName = findViewById(R.id.outlet_name);
+        //outletDesc = findViewById(R.id.outlet_desc);
+        //outletStatus = findViewById(R.id.outlet_status);
+        //openSwitch = findViewById(R.id.open_switch);
+        //itemRV = findViewById(R.id.itemRV);
         db = FirebaseFirestore.getInstance();
         itemList = new ArrayList<>();
+        searchItems = findViewById(R.id.searchMenuItems);
         loadingDialog = new LoadingDialog(Settings.this, "Fetching restaurant menu");
         loadingDialog.startLoadingDialog();
+        backBtn = findViewById(R.id.backBtn);
+        logout = findViewById(R.id.logout);
+        mAuth = FirebaseAuth.getInstance();
 
+        earnings = findViewById(R.id.earning);
+        home = findViewById(R.id.home);
+        settings = findViewById(R.id.settings);
+
+
+
+        itemRV = findViewById(R.id.itemsRV);
         adapter = new ItemAdapter(itemList);
         itemRV.setAdapter(adapter);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
-        itemRV.setLayoutManager(new LinearLayoutManager(this));
-        itemRV.addItemDecoration(
-                new DividerItemDecoration(this, layoutManager.getOrientation()) {
-                    @Override
-                    public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-                        int position = parent.getChildAdapterPosition(view);
-                        // hide the divider for the last child
-                        if (position == state.getItemCount() - 1) {
-                            outRect.setEmpty();
-                        } else {
-                            super.getItemOffsets(outRect, view, parent, state);
-                        }
+        itemRV.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL,false));
+
+        searchItems.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                 filter(editable.toString());
+            }
+            private void filter(String s)
+            {
+                ArrayList<Item> items = new ArrayList<>();
+                for(Item item : itemList)
+                {
+                    String itemName = item.getName();
+                    itemName = itemName.toLowerCase();
+                    s = s.toLowerCase();
+                    if(itemName.contains(s))
+                    {
+                        items.add(item);
                     }
                 }
-        );
-        openSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                changeOpenStatus(isChecked);
+                adapter.filterList(items);
             }
         });
+
+        backBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(),Homescreen_latest.class);
+                startActivity(intent);
+            }
+        });
+
+        settings.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(),Settings.class);
+                startActivity(intent);
+            }
+        });
+        home.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(),Homescreen_latest.class);
+                startActivity(intent);
+            }
+        });
+        earnings.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(),EarningScreen.class);
+                startActivity(intent);
+            }
+        });
+        logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mAuth.signOut();
+                Toast.makeText(Settings.this, "Logging Out", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(getApplicationContext(), Login.class);
+                startActivity(intent);
+
+            }
+        });
+
+
+
         setupUI();
         updateItemList(Dataholder.outlet.getId());
 
@@ -97,21 +174,9 @@ public class Settings extends AppCompatActivity {
                     }
                 });
     }
-    public void changeOpenStatus(boolean status){
-        String openStatus = (status)? "OPEN":"CLOSED";
-        db.collection("outlet").document(Dataholder.outlet.getId()).update("openStatus", openStatus).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                Toast.makeText(Settings.this, "Your shop is now "+ openStatus, Toast.LENGTH_SHORT).show();
-                Dataholder.outlet.setOpenStatus(openStatus);
-            }
-        });
-    }
+
     public void setupUI(){
-        outletName.setText(Dataholder.outlet.getName());
-        outletDesc.setText(Dataholder.outlet.getDescription());
-        outletStatus.setText(Dataholder.outlet.getOpenStatus());
-        openSwitch.setChecked((Dataholder.outlet.getOpenStatus().equals("OPEN")));
+
     }
 
     public void updateItemAvailability(Item item){
@@ -127,7 +192,7 @@ public class Settings extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        Intent intent = new Intent(this, Homescreen.class);
+        Intent intent = new Intent(this, Homescreen_latest.class);
         startActivity(intent);
         finish();
     }

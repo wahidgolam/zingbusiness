@@ -1,124 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@color/off_white">
+    android:background="@drawable/rad_8back"
+    android:layout_marginBottom="12dp">
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
+        android:layout_marginHorizontal="15dp"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:id="@+id/header">
 
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/order_image"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginRight="8dp"
-            app:cardCornerRadius="6dp">
-
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:foreground="@drawable/image_overlay_full"
-                android:src="@drawable/food_image" />
-
-        </com.google.android.material.card.MaterialCardView>
-
-        <LinearLayout
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@+id/order_image"
-            android:orientation="vertical">
+            android:text="₹ 160"
+            android:fontFamily="@font/duplet_bold"
+            android:textColor="#181A20"
+            android:textSize="18sp"
+            android:id="@+id/earningTotal"/>
 
-            <TextView
-                android:id="@+id/orders_proessed"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/urbanist_medium"
-                android:text="32 orders"
-                android:textColor="@color/grey"
-                android:textSize="12dp" />
-
-            <TextView
-                android:id="@+id/date"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/urbanist_semibold"
-                android:letterSpacing="0"
-                android:text="14-06-2022"
-                android:textColor="@color/black"
-                android:textSize="18dp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:visibility="gone"
-            android:id="@+id/active_1"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_alignParentRight="true"
-            android:gravity="right"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/timer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/menlo_bold"
-                android:letterSpacing="0"
-                android:text="-:-"
-                android:textColor="@color/black"
-                android:textSize="18dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/urbanist_medium"
-                android:text="time remaining"
-                android:textColor="@color/grey"
-                android:textSize="12dp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/request_1"
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:gravity="right"
-            android:orientation="vertical">
+            android:text="12-10-2022"
+            android:layout_below="@+id/earningTotal"
+            android:fontFamily="@font/duplet_semibold"
+            android:layout_marginTop="5dp"
+            android:textSize="14sp"
+            android:id="@+id/earningDate"/>
 
-            <TextView
-                android:id="@+id/total_amount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/menlo_bold"
-                android:letterSpacing="0"
-                android:text="₹ 560.00"
-                android:textColor="@color/black"
-                android:textSize="18dp" />
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/rad_8_greenback"
+            android:text="Paid"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="5dp"
+            android:fontFamily="@font/duplet_bold"
+            android:textColor="@color/white"
+            android:id="@+id/paidStatusTextView"/>
 
-                <ImageView
-                    android:id="@+id/status_image"
-                    android:layout_width="20dp"
-                    android:layout_height="match_parent"
-                    android:src="@drawable/paid"/>
 
-                <TextView
-                    android:id="@+id/status"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/urbanist_medium"
-                    android:text="paid"
-                    android:textColor="@color/grey"
-                    android:textSize="12dp" />
-            </LinearLayout>
-        </LinearLayout>
+
     </RelativeLayout>
 
-</LinearLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/rad12_orangeback"
+        android:layout_below="@+id/header"
+        android:layout_marginHorizontal="15dp"
+        android:id="@+id/checkOrderHistoryView"
+        android:layout_marginBottom="12dp">
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Check Order History"
+            android:layout_centerInParent="true"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:fontFamily="@font/duplet_semibold"
+            android:paddingVertical="12dp"/>
+
+
+
+
+    </RelativeLayout>
+
+
+
+</RelativeLayout>

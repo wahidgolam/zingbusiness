@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="15dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ID #5628"
+        android:fontFamily="@font/duplet_bold"
+        android:layout_marginHorizontal="15dp"
+        android:layout_marginTop="15dp"
+        android:textSize="16sp"
+        android:textColor="#181A20"
+        android:id="@+id/orderId"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="07:00 PM"
+        android:layout_below="@+id/orderId"
+        android:layout_marginHorizontal="15dp"
+        android:layout_marginTop="5dp"
+        android:fontFamily="@font/duplet_semibold"
+        android:textColor="#333"
+        android:textSize="14sp"
+        android:id="@+id/time"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hold to Dispatch"
+        android:background="#43B985"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:id="@+id/dispatch"
+        android:padding="6dp"/>
+
+
+
+
+
+
+</RelativeLayout>

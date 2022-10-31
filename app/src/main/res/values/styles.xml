@@ -16,4 +16,10 @@
         <item name="cornerSizeBottomRight">0dp</item>
         <item name="cornerSizeBottomLeft">0dp</item>
     </style>
+    <style name="customfontstyle" parent="@android:style/TextAppearance.Small" >
+        <item name="android:fontFamily">@font/duplet_semibold</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">16sp</item>
+
+    </style>
 </resources>

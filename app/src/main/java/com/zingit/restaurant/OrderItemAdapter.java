@@ -56,7 +56,7 @@ public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.View
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Order order = orderList.get(holder.getAdapterPosition());
         int statusCode = order.getStatusCode();
-        final int[] time = {20 * 60}; //default zing time - seconds
+        final int[] time = {20 * 60};//default zing time - seconds
 
         TextView placedTime = holder.placedTime;
         TextView statusText = holder.statusText;
@@ -252,7 +252,7 @@ public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.View
         final long[] secs = {0};
         Timer timer = new Timer();
         if (order.getStatusCode() == 2) {
-            final Runnable setTextViewUpdateRunnable = new Runnable() {
+              Runnable setTextViewUpdateRunnable = new Runnable() {
                 public void run() {
                     if (!timerText.getText().equals(String.valueOf(timerText(secs[0]+1)))) {
                         timerText.setText(timerText(secs[0]));
@@ -265,6 +265,12 @@ public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.View
                     Date date = new Date();
                     Timestamp nowTime = new Timestamp(date);
                     secs[0] = zingTime.getSeconds() - nowTime.getSeconds();
+                    if (secs[0] <= 0)
+                    {
+                        secs[0] = nowTime.getSeconds() - zingTime.getSeconds();
+
+
+                    }
                     if (secs[0] <= 0 || order.getStatusCode() == 3) {
                         cancel();
                     }

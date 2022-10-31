@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="15dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="1x"
+        android:fontFamily="@font/duplet_bold"
+        android:textColor="#2b2b2b"
+        android:textSize="18sp"
+        android:id="@+id/order_nos"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Cheese Masala Andhra\nGhee Paneer Masala"
+        android:layout_toEndOf="@+id/order_nos"
+        android:layout_marginLeft="10dp"
+        android:fontFamily="@font/duplet_regular"
+        android:textColor="#2b2b2b"
+        android:id="@+id/itemName"
+        android:textSize="18sp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="₹ 160.00"
+        android:layout_alignParentEnd="true"
+        android:fontFamily="@font/duplet_bold"
+        android:id="@+id/itemPrice"
+        android:textColor="#333333"
+        android:textSize="18sp"/>
+
+
+
+
+
+
+
+</RelativeLayout>

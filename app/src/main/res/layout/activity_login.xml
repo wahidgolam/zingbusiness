@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Login">
+    tools:context=".Login"
+    android:background="#FFF4EA">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -17,66 +18,81 @@
         android:animateLayoutChanges="true"
         android:gravity="center">
 
-        <ImageView
-            android:id="@+id/imageView"
-            android:layout_width="133dp"
-            android:layout_height="72dp"
-            android:layout_gravity="center"
-            android:layout_marginTop="40dp"
-            android:src="@drawable/onblogo" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="zing"
+            android:fontFamily="@font/clashdisplay_semibold"
+            android:textSize="60sp"
+            android:textColor="@color/dark_orange"/>
+
 
         <TextView
             android:id="@+id/textView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Business"
+            android:text="Restaurant Partner"
             android:textAlignment="center"
-            android:fontFamily="@font/urbanist_medium"
-            android:textSize="20dp"
+            android:fontFamily="@font/duplet_bold"
+            android:textSize="25dp"
             android:textColor="@color/black"
-            />
+            android:layout_marginTop="5dp"/>
 
         <ImageView
             android:id="@+id/imageView3"
             android:layout_width="match_parent"
-            android:layout_height="237dp"
-            android:src="@drawable/loginimg"
-            android:layout_marginTop="80dp"/>
+            android:layout_height="400dp"
+            android:src="@drawable/illustration"
+            android:layout_marginTop="20dp"/>
 
-        <TextView
-            android:id="@+id/textView2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Sign in with owner mail"
-            android:layout_marginTop="80dp"
-            android:textAlignment="center"
-            android:textSize="14dp"
-            android:fontFamily="@font/urbanist_medium"
-            android:textColor="@color/black"/>
+
 
         <Button
             android:id="@+id/button"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:layout_marginHorizontal="50dp"
-            android:background="@drawable/button_filled"
-            android:text="Continue with Google"
+            android:background="@drawable/rad12_orangeback"
+            android:text="Login"
             android:textAllCaps="false"
             android:letterSpacing="0"
-            android:textSize="18dp"
-            android:fontFamily="@font/urbanist_medium"
+            android:textSize="20dp"
+            android:fontFamily="@font/duplet_bold"
             android:layout_marginTop="10dp"
             android:onClick="signInPressed"/>
 
-        <TextView
-            android:id="@+id/textView3"
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="25dp"
-            android:text="Restaurant management made easy 🚀"
-            android:textAlignment="center"
-            android:textSize="14dp"
-            android:fontFamily="@font/urbanist_semibold"
-            android:textColor="@color/black"/>
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:text="or use your"
+                android:textAlignment="center"
+                android:textSize="14dp"
+                android:fontFamily="@font/duplet_regular"
+                android:textColor="@color/black"
+                android:gravity="center_horizontal"/>
+            <TextView
+                android:id="@+id/Email"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:text="@string/emailText"
+                android:textAlignment="center"
+                android:textSize="16dp"
+                android:fontFamily="@font/duplet_bold"
+                android:textColor="@color/dark_orange"
+                android:layout_toEndOf="@+id/textView3"
+                android:layout_marginLeft="5dp"/>
+        </RelativeLayout>
+
+
+
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

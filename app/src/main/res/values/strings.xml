@@ -5,4 +5,6 @@
     <string name="secondary_color">Secondary color</string>
     <string name="email_icon">email icon</string>
     <string name="firebase_web_client">141551690793-v2ju2m85iigltgs57ip0niipmvbusmbt.apps.googleusercontent.com</string>
+    <string name="emailText"><u>Email</u></string>
+    <string name="help"><u>Help</u></string>
 </resources>
