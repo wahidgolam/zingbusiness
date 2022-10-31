@@ -1,9 +1,304 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Homescreen_latest">
+    tools:context=".Homescreen_latest"
+    android:background="#FFF4EA">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/dark_orange">
+
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/header"
+        android:layout_marginTop="16dp">
+
+        <Switch
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Online"
+            android:id="@+id/open_close_switch"
+            android:fontFamily="@font/duplet_regular"
+            android:textSize="16sp"
+            android:layout_marginHorizontal="24dp"
+            android:textColor="@color/white"/>
+
+        <TextView
+            android:id="@+id/zingText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:text="zing"
+            android:fontFamily="@font/clashdisplay_semibold"
+            android:textSize="24sp"
+            android:textColor="#fff"
+            android:layout_marginHorizontal="24dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/open_close_switch"
+            android:background="@drawable/rad20_whiteback"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp"
+            android:layout_marginHorizontal="24dp"
+            android:id="@+id/zing_search">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/search"
+                android:layout_gravity="center"
+                android:layout_marginLeft="14dp" />
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/search_orderID"
+                android:background="@color/white"
+                android:layout_marginRight="15dp"
+                android:paddingVertical="10dp"
+                android:hint="Search by Order ID"
+                android:layout_marginLeft="10dp"
+                android:fontFamily="@font/duplet_semibold"
+                android:textSize="16sp"/>
+
+        </LinearLayout>
+
+        <ImageView
+            android:layout_width="140dp"
+            android:layout_height="99dp"
+            android:layout_centerInParent="true"
+            android:src="@drawable/zing_business_logo"
+            android:id="@+id/zing_bussiness_logo"
+            android:visibility="invisible"/>
+
+
+    </RelativeLayout>
+
+
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardView1"
+        style="@style/MyCardView"
+        android:layout_width="match_parent"
+        android:layout_height="32dp"
+        app:cardBackgroundColor="#FFF4EA"
+        app:cardElevation="0dp"
+        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MaterialCardView.Cut"
+        android:layout_below="@+id/header"
+        android:layout_marginTop="17dp"/>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/cardView1"
+            android:background="#FFF4EA"
+            android:id="@+id/orderRV_View">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/refresh"
+                android:background="@drawable/rad12_purpleback"
+                android:layout_marginHorizontal="24dp"
+                android:paddingVertical="10dp"
+                android:visibility="visible">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/fa_refresh"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Refresh"
+                        android:textColor="@color/white"
+                        android:fontFamily="@font/duplet_bold"
+                        android:textSize="16sp"
+                        android:layout_marginLeft="15dp"/>
+
+
+
+
+
+
+
+
+                </LinearLayout>
+
+
+
+
+            </RelativeLayout>
+
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginHorizontal="24dp"
+                android:layout_below="@+id/refresh"
+                android:layout_marginTop="10dp"
+                android:id="@+id/orderRV"
+                android:layout_marginBottom="80dp"/>
+
+
+
+        </RelativeLayout>
+
+       <RelativeLayout
+           android:layout_width="match_parent"
+           android:layout_height="match_parent"
+           android:layout_below="@+id/cardView1"
+           android:id="@+id/orderEmptyView"
+           android:visibility="gone"
+           android:background="#FFF4EA">
+
+           <ImageView
+               android:layout_width="250dp"
+               android:layout_height="250dp"
+               android:src="@drawable/store_openimg"
+               android:id="@+id/orderEmptyImage"
+               android:layout_centerHorizontal="true"/>
+
+           <RelativeLayout
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+               android:background="@drawable/rad12_orangeback"
+               android:layout_below="@+id/orderEmptyImage"
+               android:layout_marginTop="25dp"
+               android:layout_marginHorizontal="39dp"
+               android:paddingVertical="12dp"
+               android:id="@+id/register_as_partner"
+               android:visibility="gone">
+
+               <TextView
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:text="Register as a Partner Now"
+                   android:layout_centerInParent="true"
+                   android:fontFamily="@font/duplet_bold"
+                   android:textColor="@color/white"
+                   android:textSize="16sp"
+                   />
+
+           </RelativeLayout>
+
+           <RelativeLayout
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+               android:background="@drawable/rad12_orangeborder"
+               android:layout_below="@+id/register_as_partner"
+               android:layout_marginTop="15dp"
+               android:layout_marginHorizontal="39dp"
+               android:paddingVertical="12dp"
+               android:id="@+id/logout"
+               android:visibility="gone">
+
+               <ImageView
+                   android:layout_width="77dp"
+                   android:layout_height="20dp"
+                   android:src="@drawable/logout_logo"
+                   android:layout_centerInParent="true"/>
+
+           </RelativeLayout>
+
+
+       </RelativeLayout>
+
+
+
+
+
+
+
+
+
+
+
+
+        </RelativeLayout>
+
+
+    </ScrollView>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/qr_scan"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/navBar"
+        android:layout_alignParentEnd="true"
+        android:layout_gravity="end|bottom"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:onClick="dispatchOrder"
+        android:src="@drawable/qr_scan" />
+
+
+
+    <LinearLayout
+        android:id="@+id/navBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/rad_13_bottomback"
+        android:paddingHorizontal="20dp"
+        android:paddingVertical="15dp">
+
+        <ImageView
+            android:layout_width="59dp"
+            android:layout_height="50dp"
+            android:src="@drawable/settings_whiteback"
+            android:layout_weight="1"
+            android:id="@+id/settings"/>
+        <ImageView
+            android:layout_width="59dp"
+            android:layout_height="50dp"
+            android:src="@drawable/home_orangeback"
+            android:layout_weight="1"
+            android:id="@+id/home"/>
+
+        <ImageView
+            android:layout_width="59dp"
+            android:layout_height="50dp"
+            android:src="@drawable/earnings_whiteback"
+            android:layout_weight="1"
+            android:id="@+id/earning"/>
+
+
+
+
+    </LinearLayout>
+
+
+</RelativeLayout>
+
+
+
+
+
+
+
+
+

@@ -3,6 +3,7 @@ package com.zingit.restaurant;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,6 +12,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -43,13 +45,26 @@ public class Login extends AppCompatActivity {
     GoogleSignInAccount account;
     OwnerUser ownerUser;
     LoadingDialog loadingDialog;
+    TextView EmailLogin;
 
+    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
         db = FirebaseFirestore.getInstance();
+        EmailLogin = findViewById(R.id.Email);
+
+        EmailLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(),EmailLogin.class);
+                startActivity(intent);
+            }
+        });
+
+
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.firebase_web_client))
                 .requestEmail()
@@ -127,7 +142,7 @@ public class Login extends AppCompatActivity {
                                     OwnerUser ownerUser = document.toObject(OwnerUser.class);
                                     Dataholder.ownerUser = ownerUser;
                                     loadingDialog.dismissDialog();
-                                    Intent intent = new Intent(getApplicationContext(), Homescreen.class);
+                                    Intent intent = new Intent(getApplicationContext(), Homescreen_latest.class);
                                     startActivity(intent);
                                     finish();
                                 } else {
@@ -169,7 +184,7 @@ public class Login extends AppCompatActivity {
                 db.collection("ownerUser").document(id).set(ownerUser);
                 //navigate to homepage
                 loadingDialog.dismissDialog();
-                Intent intent = new Intent(getApplicationContext(), Homescreen.class);
+                Intent intent = new Intent(getApplicationContext(), Homescreen_latest.class);
                 startActivity(intent);
                 finish();
             }

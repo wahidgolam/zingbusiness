@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".OrderHistory">
+
+
+
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/dark_orange">
+
+
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/header"
+                android:paddingHorizontal="35dp">
+
+
+                <ImageView
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:src="@drawable/back_img"
+                    android:id="@+id/backBtn"
+                    android:layout_centerVertical="true"
+                    android:layout_marginTop="20dp"
+                    />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="12-02-2022"
+                    android:layout_centerHorizontal="true"
+                    android:fontFamily="@font/duplet_semibold"
+                    android:textSize="20sp"
+                    android:textColor="@color/white"
+                    android:layout_centerVertical="true"
+                    android:id="@+id/orderDate"
+                    />
+
+            </RelativeLayout>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardView1"
+                style="@style/MyCardView"
+                android:layout_width="match_parent"
+                android:layout_height="32dp"
+                app:cardBackgroundColor="#FFF4EA"
+                app:cardElevation="0dp"
+                app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MaterialCardView.Cut"
+                android:layout_below="@+id/header"
+                android:layout_marginTop="10dp"/>
+
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@id/cardView1"
+                android:background="#FFF4EA">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/rad20_whiteback"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="0dp"
+                    android:layout_marginHorizontal="24dp"
+                    android:id="@+id/searchOrderView">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/search"
+                        android:layout_gravity="center"
+                        android:layout_marginLeft="14dp" />
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/search_orderID"
+                        android:background="@color/white"
+                        android:layout_marginRight="15dp"
+                        android:paddingVertical="10dp"
+                        android:hint="Search by Order ID"
+                        android:layout_marginLeft="10dp"
+                        android:fontFamily="@font/duplet_semibold"
+                        android:textSize="16sp"/>
+
+                </LinearLayout>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_below="@+id/searchOrderView"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginHorizontal="24dp"
+                    android:id="@+id/paymentOrderRV"/>
+
+
+
+
+
+
+
+
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:background="@drawable/rad_13_bottomback"
+                android:paddingHorizontal="20dp"
+                android:paddingVertical="15dp">
+
+                <ImageView
+                    android:layout_width="59dp"
+                    android:layout_height="50dp"
+                    android:src="@drawable/settings_whiteback"
+                    android:layout_weight="1"
+                    android:id="@+id/settings"/>
+                <ImageView
+                    android:layout_width="59dp"
+                    android:layout_height="50dp"
+                    android:src="@drawable/home_whiteback"
+                    android:layout_weight="1"
+                    android:id="@+id/home"/>
+
+                <ImageView
+                    android:layout_width="59dp"
+                    android:layout_height="50dp"
+                    android:src="@drawable/earnings_orangeback"
+                    android:layout_weight="1"
+                    android:id="@+id/earning"/>
+
+
+
+
+            </LinearLayout>
+
+
+        </RelativeLayout>
+
+
+
+
+
+
+
+
+
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

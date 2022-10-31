@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
                                 if (document.exists()) {
                                     //set Data-holder
                                     Dataholder.ownerUser = document.toObject(OwnerUser.class);
-                                    Intent intent = new Intent(getApplicationContext(), Homescreen.class);
+                                    Intent intent = new Intent(getApplicationContext(), Homescreen_latest.class);
                                     startActivity(intent);
                                     finish();
                                 } else {

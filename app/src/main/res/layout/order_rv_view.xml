@@ -116,7 +116,7 @@
             </LinearLayout>
         </RelativeLayout>
         <LinearLayout
-            android:visibility="gone"
+            android:visibility="visible"
             android:id="@+id/request_2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

@@ -529,7 +529,7 @@ public class Homescreen extends AppCompatActivity {
                 updateOrder(order);
                 orderItemAdapter.notifyDataSetChanged();
                 loadingDialog2.dismissDialog();
-                addEarning(order);
+                //addEarning(order);
 
 
             }
@@ -547,7 +547,7 @@ public class Homescreen extends AppCompatActivity {
                     }
                 });
     }
-    public void addEarning(Order order){
+    /*public void addEarning(Order order){
         orderBook.startLoadingDialog();
         db.collection("earning").whereEqualTo("date", startOfDay()).whereEqualTo("outletID", Dataholder.outlet.getId()).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
@@ -585,7 +585,7 @@ public class Homescreen extends AppCompatActivity {
                 orderBook.dismissDialog();
             }
         });
-    }
+    }*/
     public void denyOrder(Order order){
         request_new--;
         showNewOrders();
@@ -677,7 +677,7 @@ public class Homescreen extends AppCompatActivity {
                 SendingNotification("Food","IsPrepared",Dataholder.FCMToken);
                 updateOrder(order);
                 orderList.sort(Comparator.comparing(Order::getZingTime));
-                orderList.sort(Comparator.comparing(Order::getStatusCode));
+                //orderList.sort(Comparator.comparing(Order::getStatusCode));
                 orderItemAdapter.notifyDataSetChanged();
                 loadingDialog2.dismissDialog();
             }
@@ -788,6 +788,37 @@ public class Homescreen extends AppCompatActivity {
         nowTime = new Timestamp(date2);
         return (nowTime);
     }
+
+    //For Night Canteenns fetch orders from evening to evening
+
+    public Timestamp startOfDayNight() {
+        Date date = new Date();
+        Timestamp nowTime = new Timestamp(date);
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(nowTime.getSeconds()*1000);
+        cal.set(Calendar.HOUR_OF_DAY, 0); //set hours to zero
+        cal.set(Calendar.MINUTE, 0); // set minutes to zero
+        cal.set(Calendar.SECOND, 0); //set seconds to zero
+        Date date2 = cal.getTime();
+        nowTime = new Timestamp(date2);
+        return (nowTime);
+    }
+    public Timestamp endOfDayNight() {
+        Date date = new Date();
+        Timestamp nowTime = new Timestamp(date);
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(nowTime.getSeconds()*1000);
+        cal.set(Calendar.HOUR_OF_DAY, 23); //set hours to zero
+        cal.set(Calendar.MINUTE, 59); // set minutes to zero
+        cal.set(Calendar.SECOND, 59); //set seconds to zero
+        Date date2 = cal.getTime();
+        nowTime = new Timestamp(date2);
+        return (nowTime);
+    }
+
+
+
+
     public void dispatchOrder(View view){
         IntentIntegrator intentIntegrator = new IntentIntegrator(this);
         intentIntegrator.setPrompt("Scan a barcode or QR Code");
@@ -872,25 +903,7 @@ public class Homescreen extends AppCompatActivity {
 
     public void SendingNotification(String title,String body,String FCMToken)
     {
-        /*Body = removeSpaces(Body);
-        Title = removeSpaces(Title);
-        if(!FCMToken.equals("")) {
-            url = url + FCMToken + "&title=" + Title + "&body="+Body;
-            Log.e("url",url);
-                    StringRequest stringRequest = new StringRequest(Request.Method.POST,url,response -> {
-                        Toast.makeText(this, "Success", Toast.LENGTH_SHORT).show();},
 
-                    error -> Toast.makeText(this, "Failure", Toast.LENGTH_SHORT).show());{
-
-
-
-                    }
-
-
-                    requestQueue = Volley.newRequestQueue(Homescreen.this);
-                    requestQueue.add(stringRequest);
-
-        }*/
         if(!FCMToken.equals("")) {
             compositeDisposable.add(fcmCloudFunction.sendNotification(FCMToken, title, body).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -919,21 +932,5 @@ public class Homescreen extends AppCompatActivity {
                     }));
         }
     }
-    public String removeSpaces(String word)
-    {
-        String word1="";
-        for(int i=0;i<word.length();i++)
-        {
-            char c = word.charAt(i);
-            if(c==' ')
-            {
-                word1 = word1 + "%20";
-            }
-            else{
-                word1 = word1 + c;
-            }
 
-        }
-        return word1;
-    }
 }

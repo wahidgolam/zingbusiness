@@ -18,10 +18,10 @@ import java.util.Date;
 public class EarningAdapter extends
         RecyclerView.Adapter<EarningAdapter.ViewHolder>{
 
-    private ArrayList<Earning> earningList;
+    private ArrayList<Earnings> earningList;
     Context context;
 
-    public EarningAdapter(ArrayList<Earning> earningList){
+    public EarningAdapter(ArrayList<Earnings> earningList){
         this.earningList = earningList;
     }
     @NonNull
@@ -39,27 +39,34 @@ public class EarningAdapter extends
 
     @Override
     public void onBindViewHolder(@NonNull EarningAdapter.ViewHolder holder, int position) {
-        Earning earning = earningList.get(position);
-        TextView date = holder.date;
-        TextView ordersProcessed = holder.ordersProcessed;
-        TextView totalAmount = holder.totalAmount;
-        TextView paidStatus = holder.paidStatus;
-        ImageView statusImage = holder.statusImage;
+        Earnings earning = earningList.get(position);
+
+
 
         SimpleDateFormat sfd = new SimpleDateFormat("dd-MM-yyyy");
-        date.setText(sfd.format(earning.getDate().toDate()));
-        String ordersProcessedText = earning.getOrdersProcessed()+" orders";
-        ordersProcessed.setText(ordersProcessedText);
-        String totalAmountText = "₹ "+earning.getTotalAmount()+".00";
-        totalAmount.setText(totalAmountText);
-        String paidStatusText = (earning.isPaidStatus())?"paid":"unpaid";
-        paidStatus.setText(paidStatusText);
-        if(earning.isPaidStatus()){
-            statusImage.setImageResource(R.drawable.paid);
+        holder.date.setText(sfd.format(earning.getDate().toDate()));
+        holder.totalAmount.setText("₹ "+earning.getTotalAmount());
+
+        Boolean paidStatus = earning.isPaidStatus();
+        if(paidStatus)
+        {
+            holder.paymentStatus.setText("PAID");
+            holder.paymentStatus.setBackgroundResource(R.drawable.rad_8_greenback);
         }
-        else{
-            statusImage.setImageResource(R.drawable.unpaid);
+        else
+        {
+            holder.paymentStatus.setText("UNPAID");
+            holder.paymentStatus.setBackgroundResource(R.drawable.rad8_redback);
         }
+
+        holder.showOrderHistory.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ((EarningScreen) context).OrderHistory(earning);
+                Dataholder.earnings = earning;
+
+            }
+        });
     }
 
     @Override
@@ -70,18 +77,17 @@ public class EarningAdapter extends
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         public TextView date;
-        public TextView ordersProcessed;
+        public TextView paymentStatus;
         public TextView totalAmount;
-        public TextView paidStatus;
-        public ImageView statusImage;
+        public RelativeLayout showOrderHistory;
+
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            date = (TextView) itemView.findViewById(R.id.date);
-            ordersProcessed = (TextView) itemView.findViewById(R.id.orders_proessed);
-            totalAmount = (TextView) itemView.findViewById(R.id.total_amount);
-            paidStatus = (TextView) itemView.findViewById(R.id.status);
-            statusImage = itemView.findViewById(R.id.status_image);
+            date = itemView.findViewById(R.id.earningDate);
+            paymentStatus = itemView.findViewById(R.id.paidStatusTextView);
+            totalAmount = itemView.findViewById(R.id.earningTotal);
+            showOrderHistory = itemView.findViewById(R.id.checkOrderHistoryView);
             context = itemView.getContext();
 
         }

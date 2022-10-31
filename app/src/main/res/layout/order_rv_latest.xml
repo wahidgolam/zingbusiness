@@ -1,6 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/rad_8back"
+    android:padding="15dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_marginBottom="10dp">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/header">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Order #2853"
+            android:fontFamily="@font/duplet_bold"
+            android:textColor="#181A20"
+            android:textSize="16sp"
+            android:id="@+id/orderId"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="from Himanshu"
+            android:layout_below="@+id/orderId"
+            android:fontFamily="@font/duplet_semibold"
+            android:layout_marginTop="4dp"
+            android:textColor="#181A20"
+            android:textSize="14sp"
+            android:id="@+id/userName"/>
+
+        <ImageView
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_alignParentEnd="true"
+            android:src="@drawable/info"
+            android:layout_centerVertical="true"
+            android:id="@+id/info"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/header"
+        android:background="@drawable/rad_8_greenback"
+        android:layout_marginTop="18dp"
+        android:visibility="visible"
+        android:id="@+id/preparingStatus"
+        android:paddingVertical="10dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/order_time"
+            android:text="Order Ready (05:10)"
+            android:layout_centerHorizontal="true"
+            android:paddingVertical="2dp"
+            android:fontFamily="@font/duplet_semibold"
+            android:textSize="16sp"
+            android:textColor="@color/white"
+
+            />
+
+
+
+    </RelativeLayout>
+
+
+
+    <RelativeLayout
+        android:id="@+id/swipeToDispatch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/header"
+        android:background="@drawable/rad_8_greenback"
+        android:layout_marginTop="15dp"
+        android:visibility="gone">
+
+        <com.ncorti.slidetoact.SlideToActView
+            android:id="@+id/slideToDispatch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:area_margin="6dp"
+            app:border_radius="12dp"
+            app:icon_margin="8dp"
+            app:inner_color="@color/white"
+            app:outer_color="#09CC81"
+            app:slider_height="51dp"
+            app:slider_icon="@drawable/swipe_icon"
+            app:text="Swipe to dispatch order"
+            app:text_appearance="@style/customfontstyle"/>
+    </RelativeLayout>
+
+
+
+
+
+
+</RelativeLayout>

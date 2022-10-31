@@ -11,6 +11,7 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -30,26 +31,62 @@ public class EarningScreen extends AppCompatActivity {
     TextView outletDesc;
     TextView outletStatus;
     RecyclerView earningRV;
-    ArrayList<Earning> earningList;
+    ArrayList<Earnings> earningList;
     LoadingDialog loadingDialog;
     EarningAdapter adapter;
+    ImageView backBtn;
+    ImageView home,earning,settings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_earning_screen);
-        outletName = findViewById(R.id.outlet_name);
-        outletDesc = findViewById(R.id.outlet_desc);
-        outletStatus = findViewById(R.id.outlet_status);
+
         earningRV = findViewById(R.id.earningRV);
         db = FirebaseFirestore.getInstance();
         earningList = new ArrayList<>();
+        backBtn = findViewById(R.id.backBtn);
+        earning = findViewById(R.id.earning);
+        home = findViewById(R.id.home);
+        settings = findViewById(R.id.settings);
+
+        backBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(),Homescreen_latest.class);
+                startActivity(intent);
+            }
+        });
+
+        earning.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(),EarningScreen.class);
+                startActivity(intent);
+            }
+        });
+        home.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(),Homescreen_latest.class);
+                startActivity(intent);
+            }
+        });
+        settings.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(),Settings.class);
+                startActivity(intent);
+            }
+        });
 
 
         adapter = new EarningAdapter(earningList);
         earningRV.setAdapter(adapter);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
-        earningRV.setLayoutManager(new LinearLayoutManager(this));
+        earningRV.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+
+
+        /*earningRV.setLayoutManager(new LinearLayoutManager(this));
         earningRV.addItemDecoration(
                 new DividerItemDecoration(this, layoutManager.getOrientation()) {
                     @Override
@@ -64,14 +101,14 @@ public class EarningScreen extends AppCompatActivity {
                     }
                 }
         );
-        setupUI();
+        setupUI();*/
         updateEarningList(Dataholder.outlet.getId());
     }
 
     private void updateEarningList(String outletID) {
         loadingDialog = new LoadingDialog(EarningScreen.this, "Fetching your earnings");
         loadingDialog.startLoadingDialog();
-        db.collection("earning")
+        db.collection("earnings")
                 .whereEqualTo("outletID", outletID).orderBy("date", Query.Direction.DESCENDING)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -79,8 +116,9 @@ public class EarningScreen extends AppCompatActivity {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                Earning earning = document.toObject(Earning.class);
+                                Earnings earning = document.toObject(Earnings.class);
                                 earningList.add(earning);
+                                Log.e("Earnings", earning.getTotalAmount()+"");
                             }
                             adapter.notifyDataSetChanged();
                             loadingDialog.dismissDialog();
@@ -89,16 +127,25 @@ public class EarningScreen extends AppCompatActivity {
                         }
                     }
                 });
+       }
+
+    public void OrderHistory(Earnings earning)
+    {
+        Intent intent = new Intent(getApplicationContext(), OrderHistory.class);
+        startActivity(intent);
     }
 
     public void setupUI(){
         outletName.setText(Dataholder.outlet.getName());
         outletDesc.setText(Dataholder.outlet.getDescription());
         outletStatus.setText(Dataholder.outlet.getOpenStatus());
+        home = findViewById(R.id.home);
+        settings = findViewById(R.id.settings);
+        earning = findViewById(R.id.earning);
     }
     @Override
     public void onBackPressed() {
-        Intent intent = new Intent(this, Homescreen.class);
+        Intent intent = new Intent(this, Homescreen_latest.class);
         startActivity(intent);
         finish();
     }

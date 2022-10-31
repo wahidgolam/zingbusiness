@@ -3,37 +3,26 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@color/off_white">
+    android:background="@drawable/rad_8back"
+    android:layout_marginBottom="15dp">
     <RelativeLayout
         android:id="@+id/item_rv_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingHorizontal="28dp"
+        android:paddingHorizontal="15dp"
         android:layout_marginVertical="16dp">
 
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/foodimage"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            app:cardCornerRadius="6dp"
-            android:layout_alignParentLeft="true">
 
-            <ImageView
-                android:id="@+id/item_image"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:foreground="@drawable/image_overlay_full"
-                android:src="@drawable/food_image" />
-        </com.google.android.material.card.MaterialCardView>
+
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="12dp"
+            android:layout_marginLeft="0dp"
             android:gravity="center_vertical"
             android:orientation="vertical"
-            android:layout_toRightOf="@+id/foodimage"
-            android:layout_centerVertical="true">
+            android:layout_centerVertical="true"
+            >
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -45,17 +34,12 @@
                     android:id="@+id/item_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="@font/urbanist_semibold"
+                    android:fontFamily="@font/duplet_semibold"
                     android:text="Cheese Maggi"
                     android:textColor="@color/black"
                     android:textSize="16dp" />
 
-                <ImageView
-                    android:id="@+id/veg_image"
-                    android:layout_width="10dp"
-                    android:layout_height="10dp"
-                    android:layout_marginLeft="8dp"
-                    android:src="@drawable/nonveg" />
+
             </LinearLayout>
 
             <TextView
@@ -63,7 +47,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:fontFamily="@font/menlo_bold"
+                android:fontFamily="@font/duplet_semibold"
                 android:letterSpacing="0"
                 android:text="₹ 60.00"
                 android:textColor="@color/grey"
@@ -80,7 +64,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
-                android:text="Available "
                 android:checked="false"
                 android:fontFamily="@font/urbanist_medium" />
         </LinearLayout>
