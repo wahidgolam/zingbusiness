@@ -29,6 +29,7 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -40,6 +41,7 @@ public class NotifService extends Service {
     FirebaseFirestore db;
     String outletID;
     Intent notificationIntent;
+    ArrayList<Payment> orderList;
 
     @Override
     public void onCreate() {
@@ -49,12 +51,9 @@ public class NotifService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        Log.e("Notif", "onStartCommand");
-
-
-        outletID = intent.getStringExtra("outletID");
-        Log.e("OutletId",outletID);
-         notificationIntent = new Intent(this, Homescreen_latest.class);
+        outletID = Dataholder.outlet.getId();
+        notificationIntent = new Intent(this, MainActivity.class);
+        orderList = new ArrayList<>();
 
         //Trying Pending Intent
         PendingIntent pendingIntent;
@@ -67,11 +66,6 @@ public class NotifService extends Service {
                     0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         }
-        /*PendingIntent pendingIntent = PendingIntent.getActivity(this,
-                0, notificationIntent, 0);*/
-
-
-
 
         Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         createNotificationChannel();
@@ -85,8 +79,6 @@ public class NotifService extends Service {
 
         startForeground(1, notification);
         fetchRequests();
-        //do heavy work on a background thread
-        //stopSelf();
 
         return START_NOT_STICKY;
     }
@@ -144,9 +136,8 @@ public class NotifService extends Service {
 
     }*/
     public void fetchRequests(){
-        Log.e("Notif", "fetchRequest");
         //fetching requests
-        Query query = db.collection("payment").whereEqualTo("outletID", Dataholder.outlet.getId()).whereEqualTo("statusCode", 1).whereGreaterThan("placedTime", startOfDay()).whereLessThan("placedTime", endOfDay());
+        Query query = db.collection("payment").whereEqualTo("outletID", Dataholder.outlet.getId()).whereEqualTo("statusCode", 1);
         query.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot snapshots, @Nullable FirebaseFirestoreException error) {
@@ -163,8 +154,10 @@ public class NotifService extends Service {
                                 try {
                                     Payment payment = dc.getDocument().toObject(Payment.class);
                                     if(payment.getStatusCode()==1){
-                                    notification("New Order", "You have a new order");
-                                    Log.e("StatusCode","1");}
+                                        AddWithCaution(payment);}
+
+                                    //notification("New Order", "You have a new order");
+                                    //Log.e("StatusCode","1");}
                                 }
                                 catch (Exception e){
                                     e.printStackTrace();
@@ -181,6 +174,9 @@ public class NotifService extends Service {
                         }
                     }
                 }
+                else{
+                    Log.d("SNAPSHOT EMPTY", "EMPTY");
+                }
             }
         });
     }
@@ -189,6 +185,27 @@ public class NotifService extends Service {
     public int getNextUniqueRandomNumber() {
         return number++;
     }*/
+    public void AddWithCaution(Payment payment)
+    {
+        int flag=0;
+        for(int i=0;i<orderList.size();i++)
+        {
+            if(orderList.get(i).getPaymentOrderID().equals(payment.getPaymentOrderID()))
+                flag=1;
+        }
+        if(flag==0)
+        {
+            orderList.add(payment);
+
+            try
+            {sendNotification("New Order", "You have an order from " + payment.getUserName());}
+            catch (Exception e)
+            {
+                Log.e("ERROR", e.getLocalizedMessage());
+            }
+        }
+
+    }
 
     public Timestamp startOfDay() {
         Date date = new Date();
@@ -260,6 +277,7 @@ public class NotifService extends Service {
     private void createNotificationChannel() {
 
         Log.e("Notif", "CreateNofitification");
+
         Uri soundUri = Uri.parse("android.resource://" + getApplicationContext()
                 .getPackageName() + "/" + R.raw.notifsound);
 
@@ -290,7 +308,16 @@ public class NotifService extends Service {
         }
     }
 
-    private void sendNotification(String title, String message) throws IOException {
+    public void sendNotification(String title, String message) throws IOException {
+
+        final MediaPlayer mp = MediaPlayer.create(this, R.raw.notifsound);
+        mp.start();
+        mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            public void onCompletion(MediaPlayer mp) {
+                mp.release();
+            }
+        });
+
         Log.e("SendNotification","yaha hu me");
         Intent intent = new Intent(this, Homescreen_latest.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -327,6 +354,7 @@ public class NotifService extends Service {
 
     public void notification(String title,String message)
     {
+        Log.e("SendNotification","yaha hu me 123");
         Intent fullScreenIntent = new Intent(this, Homescreen_latest.class);
         PendingIntent fullScreenPendingIntent = PendingIntent.getActivity(this, 0,
                 fullScreenIntent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -360,14 +388,20 @@ public class NotifService extends Service {
 
         }
 
-        Notification notification = new NotificationCompat.Builder(this, "123")
+        /*Notification notification = new NotificationCompat.Builder(this, "123")
                 .setContentTitle("Zing Business Running")
                 .setContentText("Your Shop is Open")
                 .setSmallIcon(R.drawable.ic_notif)
                 .setContentIntent(pendingIntent)
+                .build();*/
+        Notification notification = new NotificationCompat.Builder(this, "123")
+                .setContentTitle("New Order")
+                .setContentText("You have a new order")
+                .setSmallIcon(R.drawable.ic_notif)
+                .setContentIntent(pendingIntent)
                 .build();
 
-        startForeground(1, incomingCallNotification);
+        startForeground(1, notification);
     }
 
 
@@ -376,6 +410,8 @@ public class NotifService extends Service {
     public int getNextUniqueRandomNumber() {
         return number++;
     }
+
+
 
 
 
