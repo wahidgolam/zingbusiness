@@ -276,12 +276,16 @@ public class Homescreen_latest extends AppCompatActivity {
             }
         });*/
 
+
+
         openOutlet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 boolean outletStatus = openOutlet.isChecked();
                 if (outletStatus)   // If shop is closed then it will open with no conditions
                 {
+                    serviceIntent.putExtra("outletID", currentOutlet.getId());
+                    ContextCompat.startForegroundService(getApplicationContext(), serviceIntent);
 
                     UpdateOutletStatus(outletStatus);
                     //Toast.makeText(Homescreen_latest.this, "OPEN", Toast.LENGTH_SHORT).show();
@@ -294,6 +298,7 @@ public class Homescreen_latest extends AppCompatActivity {
                     {
                         //Toast.makeText(Homescreen_latest.this, "CLOSED", Toast.LENGTH_SHORT).show();
                         openOutlet.setText("Offline");
+                        stopService();
                         UpdateOutletStatus(outletStatus);
 
                     }
@@ -1379,6 +1384,8 @@ public class Homescreen_latest extends AppCompatActivity {
         super.onStop();
         compositeDisposable.clear();
     }
+
+
 
     /*@Override
     protected void onDestroy() {

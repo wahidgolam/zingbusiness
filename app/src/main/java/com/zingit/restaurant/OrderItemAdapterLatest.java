@@ -100,7 +100,7 @@ public class OrderItemAdapterLatest extends RecyclerView.Adapter<com.zingit.rest
                     final Runnable setTextViewUpdateRunnable = new Runnable() {
                         public void run() {
                             if (!holder.orderTime.getText().equals(String.valueOf(timerText(secs[0] + 1)))) {
-                                if (secs[0]<0)
+                                if (secs[0]<=0)
                                 {
                                     holder.orderPreparingStatus.setBackgroundResource(R.drawable.rad8_redback);
 
