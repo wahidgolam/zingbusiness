@@ -7,4 +7,6 @@
     <string name="firebase_web_client">141551690793-v2ju2m85iigltgs57ip0niipmvbusmbt.apps.googleusercontent.com</string>
     <string name="emailText"><u>Email</u></string>
     <string name="help"><u>Help</u></string>
+    <string name="terms_and_conditon"><u>T/C</u></string>
+    <string name="privacy"><u>Privacy Policy</u></string>
 </resources>

@@ -7,6 +7,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -46,6 +47,7 @@ public class Login extends AppCompatActivity {
     OwnerUser ownerUser;
     LoadingDialog loadingDialog;
     TextView EmailLogin;
+    TextView termsAndCondtion,privacyPolicy;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -55,12 +57,33 @@ public class Login extends AppCompatActivity {
 
         db = FirebaseFirestore.getInstance();
         EmailLogin = findViewById(R.id.Email);
+        termsAndCondtion = findViewById(R.id.tnc);
+        privacyPolicy = findViewById(R.id.privacy);
 
         EmailLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(),EmailLogin.class);
                 startActivity(intent);
+            }
+        });
+
+        termsAndCondtion.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent httpIntent = new Intent(Intent.ACTION_VIEW);
+                httpIntent.setData(Uri.parse("https://zingnow.in/legal/tnc"));
+                startActivity(httpIntent);
+            }
+        });
+
+        privacyPolicy.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent httpIntent = new Intent(Intent.ACTION_VIEW);
+                httpIntent.setData(Uri.parse("https://zingnow.in/legal/privacy"));
+
+                startActivity(httpIntent);
             }
         });
 

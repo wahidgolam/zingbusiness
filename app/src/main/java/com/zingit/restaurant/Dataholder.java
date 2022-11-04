@@ -13,4 +13,5 @@ public class Dataholder {
     public static ArrayList<Integer> totalAmount;
     public static ArrayList<Payment> historyOrderList = new ArrayList<>();
     public static Earnings earnings = new Earnings();
+    public static Support support ;
 }

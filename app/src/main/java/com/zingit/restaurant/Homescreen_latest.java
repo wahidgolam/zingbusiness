@@ -9,8 +9,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -100,6 +103,7 @@ public class Homescreen_latest extends AppCompatActivity {
     ArrayList<OrderItem> dialogOrdersList = new ArrayList<>();
     TextView infoDialogOrderTotal;
     Payment infoDialogClickedPayment;
+    TextView infoDialogHelp;
     TextView infoDialogOrderId;
     EditText searchOrderId;
     Switch openOutlet;
@@ -129,6 +133,10 @@ public class Homescreen_latest extends AppCompatActivity {
     RelativeLayout registerPartner,logout;
     FirebaseAuth mAuth;
     FloatingActionButton qr_code;
+
+    Context context;
+
+    String applyUrl = "https://0owqe9mfaff.typeform.com/to/dv5erRgq?typeform-source=hottopdeal.com";
 
 
 
@@ -366,6 +374,20 @@ public class Homescreen_latest extends AppCompatActivity {
             }
         });
 
+        infoDialogHelp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                contactSupport();
+            }
+        });
+
+        dialogHelp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                contactSupport();
+            }
+        });
+
 
 
 
@@ -390,6 +412,14 @@ public class Homescreen_latest extends AppCompatActivity {
             }
         });
 
+        registerPartner.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent httpIntent = new Intent(Intent.ACTION_VIEW);
+                httpIntent.setData(Uri.parse(applyUrl));
+                startActivity(httpIntent);
+            }
+        });
 
 
 
@@ -428,6 +458,8 @@ public class Homescreen_latest extends AppCompatActivity {
              }
          });
     }
+
+
 
 
 
@@ -507,6 +539,7 @@ public class Homescreen_latest extends AppCompatActivity {
         infoOrderReady = infoDialog.findViewById(R.id.order_ready);
         infoSwipeToDispatch = infoDialog.findViewById(R.id.swipeToDispatch);
         infoSlideToDispatch = infoDialog.findViewById(R.id.slideToDispatch);
+        infoDialogHelp = infoDialog.findViewById(R.id.help);
         infoDialogPayment = new Payment();
 
         //swipeRefreshLayout = findViewById(R.id.swipeToRefresh);
@@ -526,14 +559,16 @@ public class Homescreen_latest extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         qr_code = findViewById(R.id.qr_scan);
 
+        context = getApplicationContext();
+
 
 
 
 
         fetchOutletDetails();
-        //fetchLatestOrder();
         fetchOrders();
-        //fetchOrders();
+
+
 
     }
 
@@ -573,6 +608,7 @@ public class Homescreen_latest extends AppCompatActivity {
                             }
                             //setupUI();
                             fetchOrders();
+                            help();  //fetch support contact
                         } else {
                             Log.d("Firestore access", "No such document");
                         }
@@ -1378,6 +1414,42 @@ public class Homescreen_latest extends AppCompatActivity {
             }
         });
     }
+
+    public void help() {
+        String campusID = Dataholder.outlet.getCampusID();
+        db.collection("support").whereEqualTo("campusID", campusID).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if(task.isSuccessful())
+                {
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        Support  support = document.toObject(Support.class);
+                        Dataholder.support = support;
+                    }
+                }
+            }
+        });
+    }
+
+    public void contactSupport()
+    {
+        String text = "Hi, my payment orderID is " + infoDialogPayment.getPaymentOrderID() + " placed by " + infoDialogPayment.getUserName() + " total amount: " + infoDialogPayment.getBasePrice() ;
+        String url = "https://api.whatsapp.com/send?phone=91" + Dataholder.support.getPhoneNumber()+ "&text=" + text;
+        try {
+            PackageManager pm = getApplicationContext().getPackageManager();
+            pm.getPackageInfo("com.whatsapp", PackageManager.GET_ACTIVITIES);
+            Intent i = new Intent(Intent.ACTION_VIEW);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+            i.putExtra(Intent.EXTRA_TEXT, text);
+            i.setData(Uri.parse(url));
+            getApplicationContext().startActivity(i);
+        } catch (PackageManager.NameNotFoundException e) {
+            Toast.makeText(getApplicationContext(), "Whatsapp is not installed in this phone", Toast.LENGTH_SHORT).show();
+            Log.e("I am here",e.getLocalizedMessage());
+        }
+    }
+
+
 
     @Override
     protected void onStop() {

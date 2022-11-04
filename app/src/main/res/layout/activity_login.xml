@@ -45,6 +45,42 @@
             android:src="@drawable/illustration"
             android:layout_marginTop="20dp"/>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="center"
+            android:gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Read our   "
+                android:fontFamily="@font/duplet_semibold"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/terms_and_conditon"
+                android:fontFamily="@font/duplet_bold"
+                android:textColor="@color/dark_orange"
+                android:id="@+id/tnc"
+                />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="   and   "
+                android:fontFamily="@font/duplet_semibold"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/privacy"
+                android:fontFamily="@font/duplet_bold"
+                android:textColor="@color/dark_orange"
+                android:id="@+id/privacy"/>
+
+
+        </LinearLayout>
+
 
 
         <Button

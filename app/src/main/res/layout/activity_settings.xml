@@ -96,7 +96,7 @@
                     android:background="@color/white"
                     android:layout_marginRight="15dp"
                     android:paddingVertical="10dp"
-                    android:hint="Search by Order ID"
+                    android:hint="Search items"
                     android:layout_marginLeft="10dp"
                     android:fontFamily="@font/duplet_semibold"
                     android:textSize="16sp"/>
