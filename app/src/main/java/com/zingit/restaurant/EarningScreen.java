@@ -43,6 +43,7 @@ public class EarningScreen extends AppCompatActivity {
         setContentView(R.layout.activity_earning_screen);
 
         earningRV = findViewById(R.id.earningRV);
+        earningRV.setNestedScrollingEnabled(false);
         db = FirebaseFirestore.getInstance();
         earningList = new ArrayList<>();
         backBtn = findViewById(R.id.backBtn);
