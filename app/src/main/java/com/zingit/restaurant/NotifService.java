@@ -203,6 +203,11 @@ public class NotifService extends Service {
             catch (Exception e)
             {
                 Log.e("ERROR", e.getLocalizedMessage());
+                try {
+                    sendNotification("New Order", "You have an order from " + payment.getUserName());
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
             }
         }
 
@@ -331,12 +336,6 @@ public class NotifService extends Service {
                     0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         }
-        Notification notification = new NotificationCompat.Builder(this, "1234")
-                .setContentTitle("Zing Business Running")
-                .setContentText("Your Shop is Open")
-                .setSmallIcon(R.drawable.ic_notif)
-                .setContentIntent(pendingIntent)
-                .build();
 
         String channelId = "1234";
 
@@ -357,12 +356,13 @@ public class NotifService extends Service {
 
         NotificationManager mNotificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
 
         // Since android Oreo notification channel is needed.
 
         //pushing notification
-        mNotificationManager.notify(getNextUniqueRandomNumber(), notificationBuilder.build());
-        //notificationManager.notify(getNextUniqueRandomNumber() /* ID of notification */, notificationBuilder.build());
+        //mNotificationManager.notify(getNextUniqueRandomNumber(), notificationBuilder.build());
+        notificationManager.notify(getNextUniqueRandomNumber() /* ID of notification */, notificationBuilder.build());
     }
 
     public void notification(String title,String message)
@@ -378,6 +378,7 @@ public class NotifService extends Service {
                         .setContentText(message)
                         .setPriority(NotificationCompat.PRIORITY_HIGH)
                         .setCategory(NotificationCompat.CATEGORY_CALL)
+
 
                         // Use a full-screen intent only for the highest-priority alerts where you
                         // have an associated activity that you would like to launch after the user

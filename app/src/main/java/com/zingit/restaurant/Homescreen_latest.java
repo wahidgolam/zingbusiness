@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.app.ActivityManager;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -582,6 +583,15 @@ public class Homescreen_latest extends AppCompatActivity {
 
 
     }
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public void fetchOutletDetails() {
        // Toast.makeText(this, "Dataholder" + Dataholder.ownerUser.getOutletID(), Toast.LENGTH_SHORT).show();
@@ -606,12 +616,19 @@ public class Homescreen_latest extends AppCompatActivity {
                                     orderRVLayout.setVisibility(View.GONE);
                                     orderEmptyView.setVisibility(View.VISIBLE);
                                     orderEmptyImage.setBackgroundResource(R.drawable.store_openimg);
+                                    /*
                                     if(Dataholder.inAppServiceIntentCall==0) {
                                         serviceIntent.putExtra("outletID", currentOutlet.getId());
                                         ContextCompat.startForegroundService(getApplicationContext(), serviceIntent);
                                         Dataholder.inAppServiceIntentCall=1;
                                     }
                                     else{}
+                                    */
+
+                                    if(!isMyServiceRunning(NotifService.class)){
+                                        serviceIntent.putExtra("outletID", currentOutlet.getId());
+                                        ContextCompat.startForegroundService(getApplicationContext(), serviceIntent);
+                                    }
                                 } catch (Exception e) {
                                     Toast.makeText(getApplicationContext(), "" + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                                 }
