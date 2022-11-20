@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:padding="32dp"
-    android:background="@color/dark_orange">
+    android:background="@color/white">
 
     <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/animationView"
@@ -16,7 +16,7 @@
         android:layout_gravity="center"
         app:lottie_autoPlay="true"
         app:lottie_loop="true"
-        app:lottie_rawRes="@raw/load" />
+        app:lottie_rawRes="@raw/load2" />
 
     <TextView
         android:id="@+id/dialogText"
@@ -26,7 +26,7 @@
         android:layout_centerHorizontal="true"
         android:layout_gravity="center"
         android:layout_marginTop="18dp"
-        android:textColor="@color/white"
+        android:textColor="@color/black"
         android:fontFamily="@font/urbanist_medium"
         android:text="Fetching all restaurants near you" />
 

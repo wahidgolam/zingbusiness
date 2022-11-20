@@ -64,7 +64,7 @@ public class EmailLogin extends AppCompatActivity {
             mAuth.signInWithEmailAndPassword(Email, Password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
-                    if (task.isComplete()) {
+                    if (task.isSuccessful()) {
                         FirebaseUser user = task.getResult().getUser();
                         Log.d("Debug1", user.getUid());
                         DocumentReference userConcerned = db.collection("ownerUser").document(user.getUid());
@@ -78,6 +78,7 @@ public class EmailLogin extends AppCompatActivity {
                                         //set Data-holder
                                         OwnerUser ownerUser = document.toObject(OwnerUser.class);
                                         Dataholder.ownerUser = ownerUser;
+                                        Log.e("loginDetails", Dataholder.ownerUser.getOutletID());
                                         loadingDialog.dismissDialog();
                                         Toast.makeText(EmailLogin.this, "Login Successful", Toast.LENGTH_SHORT).show();
                                         Intent intent = new Intent(getApplicationContext(), Homescreen_latest.class);
@@ -97,7 +98,8 @@ public class EmailLogin extends AppCompatActivity {
                         // If sign in fails, display a message to the user.
                         Log.w("FirebaseAuth", "signInWithCredential:failure", task.getException());
                         //Display failure information to user
-                        Toast.makeText(EmailLogin.this, "" + task.getException(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(EmailLogin.this, "Password is invalid", Toast.LENGTH_SHORT).show();
+                        loadingDialog.dismissDialog();
                     }
                 }
 

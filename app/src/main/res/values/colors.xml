@@ -11,4 +11,5 @@
     <color name="colorTransparent">#00ffffff</color>
     <color name="alert">#FFEED202</color>
     <color name="transparent_orange">#FFF6D6CF</color>
+    <color name="green">#43B985</color>
 </resources>

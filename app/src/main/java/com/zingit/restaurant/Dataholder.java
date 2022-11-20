@@ -14,4 +14,5 @@ public class Dataholder {
     public static ArrayList<Payment> historyOrderList = new ArrayList<>();
     public static Earnings earnings = new Earnings();
     public static Support support ;
+    public static int inAppServiceIntentCall=0;
 }

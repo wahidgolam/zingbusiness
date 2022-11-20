@@ -5,6 +5,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.AudioAttributes;
@@ -68,7 +69,7 @@ public class NotifService extends Service {
         }
 
         Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        createNotificationChannel();
+        createNotificationChannel("123");
 
         Notification notification = new NotificationCompat.Builder(this, "123")
                 .setContentTitle("Zing Business Running")
@@ -274,7 +275,7 @@ public class NotifService extends Service {
         }
     }*/
 
-    private void createNotificationChannel() {
+    private void createNotificationChannel(String id) {
 
         Log.e("Notif", "CreateNofitification");
 
@@ -290,7 +291,7 @@ public class NotifService extends Service {
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             int importance = NotificationManager.IMPORTANCE_HIGH;
-            NotificationChannel notificationChannel = new NotificationChannel("123", "Zing Business", importance);
+            NotificationChannel notificationChannel = new NotificationChannel(id, "Zing Business", importance);
             notificationChannel.enableLights(true);
             notificationChannel.enableVibration(true);
             notificationChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
@@ -310,6 +311,8 @@ public class NotifService extends Service {
 
     public void sendNotification(String title, String message) throws IOException {
 
+        createNotificationChannel("1234");
+
         final MediaPlayer mp = MediaPlayer.create(this, R.raw.notifsound);
         mp.start();
         mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
@@ -318,16 +321,26 @@ public class NotifService extends Service {
             }
         });
 
-        Log.e("SendNotification","yaha hu me");
-        Intent intent = new Intent(this, Homescreen_latest.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
-                PendingIntent.FLAG_ONE_SHOT);
+        PendingIntent pendingIntent;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            pendingIntent = PendingIntent.getActivity(this,
+                    0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
-        String channelId = "123";
+        }else {
+            pendingIntent = PendingIntent.getActivity(this,
+                    0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        Uri soundUri = Uri.parse("android.resource://" + getApplicationContext()
-                .getPackageName() + "/" + R.raw.notifsound);
+        }
+        Notification notification = new NotificationCompat.Builder(this, "1234")
+                .setContentTitle("Zing Business Running")
+                .setContentText("Your Shop is Open")
+                .setSmallIcon(R.drawable.ic_notif)
+                .setContentIntent(pendingIntent)
+                .build();
+
+        String channelId = "1234";
+
+
 
         NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(this, channelId)
@@ -335,26 +348,25 @@ public class NotifService extends Service {
                         .setContentTitle(title)
                         .setContentText(message)
                         .setVibrate(new long[]{500, 500})
-                        .setAutoCancel(true)
+                        //.setAutoCancel(true)
                         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                        .setSound(soundUri)
-                        .setFullScreenIntent(pendingIntent, true)
+                        .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                        .setContentIntent(pendingIntent)
                         .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
                         .setChannelId("123");
 
-        NotificationManagerCompat notificationManager =
-                NotificationManagerCompat.from(this);
+        NotificationManager mNotificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         // Since android Oreo notification channel is needed.
-        createNotificationChannel();
 
         //pushing notification
-        notificationManager.notify(getNextUniqueRandomNumber() /* ID of notification */, notificationBuilder.build());
+        mNotificationManager.notify(getNextUniqueRandomNumber(), notificationBuilder.build());
+        //notificationManager.notify(getNextUniqueRandomNumber() /* ID of notification */, notificationBuilder.build());
     }
 
     public void notification(String title,String message)
     {
-        Log.e("SendNotification","yaha hu me 123");
         Intent fullScreenIntent = new Intent(this, Homescreen_latest.class);
         PendingIntent fullScreenPendingIntent = PendingIntent.getActivity(this, 0,
                 fullScreenIntent, PendingIntent.FLAG_UPDATE_CURRENT);

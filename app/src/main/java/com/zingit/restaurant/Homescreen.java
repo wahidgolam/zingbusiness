@@ -173,6 +173,7 @@ public class Homescreen extends AppCompatActivity {
 
         //setting up order recycler view
         orderItemAdapter = new OrderItemAdapter(orderList);
+        orderRV.setNestedScrollingEnabled(false);
         orderRV.setAdapter((orderItemAdapter));
         orderRV.setLayoutManager(new LinearLayoutManager(this));
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);

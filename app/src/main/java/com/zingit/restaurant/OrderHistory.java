@@ -166,6 +166,7 @@ public class OrderHistory extends AppCompatActivity {
 
         infoDialogOrderTotal = infoDialog.findViewById(R.id.orderTotal);
         infoDialogOrderRV = infoDialog.findViewById(R.id.dialogOrderRV);
+        infoDialogOrderRV.setNestedScrollingEnabled(false);
         infoDialogOrderRV.setAdapter(newOrdersAdapter1);
         infoDialogOrderRV.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL,false));
         swipeToDispatch = infoDialog.findViewById(R.id.swipeToDispatch);

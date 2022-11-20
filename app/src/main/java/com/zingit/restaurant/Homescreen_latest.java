@@ -14,6 +14,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -138,6 +139,9 @@ public class Homescreen_latest extends AppCompatActivity {
 
     String applyUrl = "https://0owqe9mfaff.typeform.com/to/dv5erRgq?typeform-source=hottopdeal.com";
 
+    int statusCode;
+
+
 
 
 
@@ -164,7 +168,7 @@ public class Homescreen_latest extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 acceptOrders();
-                Toast.makeText(Homescreen_latest.this, "Accept Orders", Toast.LENGTH_SHORT).show();
+                Toast.makeText(Homescreen_latest.this, "Order Accepted", Toast.LENGTH_SHORT).show();
             }
         });
         dialogRejectOrder.setOnClickListener(new View.OnClickListener() {
@@ -453,6 +457,7 @@ public class Homescreen_latest extends AppCompatActivity {
                      orderItemAdapterLatest.notifyDataSetChanged();
                     // Toast.makeText(Homescreen_latest.this, "Ready to Dispatch", Toast.LENGTH_SHORT).show();
                      infoDialog.dismiss();
+                     UpdateStatusCode(payment);
 
                  }
              }
@@ -467,6 +472,12 @@ public class Homescreen_latest extends AppCompatActivity {
 
     public void setupUI()
     {
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+        {
+            Window window = this.getWindow();
+            window.setStatusBarColor(this.getResources().getColor(R.color.dark_orange));
+        }
 
         View view = getLayoutInflater().inflate(R.layout.new_order_dialog,null);
         dialog = new Dialog(Homescreen_latest.this, android.R.style.Theme_DeviceDefault_Light_NoActionBar );
@@ -586,6 +597,8 @@ public class Homescreen_latest extends AppCompatActivity {
                             currentOutlet = document.toObject(Outlet.class);
                             Dataholder.outlet = currentOutlet;
                             serviceIntent = new Intent(getApplicationContext(), NotifService.class);
+
+
                             if (currentOutlet.getOpenStatus().equals("OPEN")) {
                                 try {
                                     openOutlet.setText("Online");
@@ -593,8 +606,12 @@ public class Homescreen_latest extends AppCompatActivity {
                                     orderRVLayout.setVisibility(View.GONE);
                                     orderEmptyView.setVisibility(View.VISIBLE);
                                     orderEmptyImage.setBackgroundResource(R.drawable.store_openimg);
-                                    serviceIntent.putExtra("outletID", currentOutlet.getId());
-                                    ContextCompat.startForegroundService(getApplicationContext(), serviceIntent);
+                                    if(Dataholder.inAppServiceIntentCall==0) {
+                                        serviceIntent.putExtra("outletID", currentOutlet.getId());
+                                        ContextCompat.startForegroundService(getApplicationContext(), serviceIntent);
+                                        Dataholder.inAppServiceIntentCall=1;
+                                    }
+                                    else{}
                                 } catch (Exception e) {
                                     Toast.makeText(getApplicationContext(), "" + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                                 }
@@ -673,10 +690,8 @@ public class Homescreen_latest extends AppCompatActivity {
                                 switch(added_payment.getStatusCode()){
 
                                     case 1: Log.e("Added Payment", counter++ + " ");
-                                        //ContextCompat.startForegroundService(getApplicationContext(), serviceIntent);
-
                                         Log.e("Added Orders", added_payment.getPaymentOrderID());
-                                    AddWithCaution(added_payment);
+                                        AddWithCaution(added_payment);
                                     break;
                                     case 2: Log.e("Added", added_payment.getPaymentOrderID());
                                         AddPreparingWithCaution(added_payment);
@@ -701,10 +716,10 @@ public class Homescreen_latest extends AppCompatActivity {
                                     case 1:
                                         break;
                                     case 2: Log.e("Order Modified", "Case 2");
-                                        ModifyWithCaution(modified_payment);
+                                        //ModifyWithCaution(modified_payment);
                                     break;
                                     case 3: Log.e("Order Modified", "Case 3");
-                                        UpdateStatusCode(modified_payment);
+                                        //UpdateStatusCode(modified_payment);
                                         break;
 
                                     case 4: Log.e("Order Modified","Case 4");
@@ -712,6 +727,9 @@ public class Homescreen_latest extends AppCompatActivity {
 
                                     case -3: Log.e("Order Modified", "Case -3");
                                              dialog.dismiss();
+                                             Refresh();
+
+
                                              Dataholder.recentOrderList.remove(0);
                                              orderItemAdapterLatest.notifyDataSetChanged();
                                              break;
@@ -735,18 +753,11 @@ public class Homescreen_latest extends AppCompatActivity {
                                 }
                                 switch(removed_payment.getStatusCode()){
 
-                                    case 1: RejectOrderWithCaution(removed_payment);
+                                    case 1: //RejectOrderWithCaution(removed_payment);
                                     Log.e("Refund","Order Denied");
                                     break;
-
-
-
-
-                                    case 3: Log.e("Case 3","Removed 3");
-                                        CompletedOrders(removed_payment.getPaymentOrderID());
-                                        break;
-                                    case 4: Log.e("Case 4","case 4");
-                                    break;
+                                    case -3: OrderCancelled(removed_payment);
+                                    Log.e("Order Cancelled", "Order Cancelled");
 
 
 
@@ -766,6 +777,20 @@ public class Homescreen_latest extends AppCompatActivity {
         public void stopService(){
             Intent serviceIntent = new Intent(this, NotifService.class);
             stopService(serviceIntent);
+        }
+
+        public void OrderCancelled(Payment payment)
+        {
+            if(Dataholder.recentOrderList.size()>0){
+            Dataholder.recentOrderList.remove(0);
+
+            if(Dataholder.recentOrderList.size()==0){
+                dialog.cancel();
+                Refresh();}
+                Toast.makeText(this, "Last Order was Cancelled", Toast.LENGTH_SHORT).show();
+
+
+            }
         }
 
     public void OrderComplete(Payment payment)   // Updating in database to status 4
@@ -804,6 +829,9 @@ public class Homescreen_latest extends AppCompatActivity {
 
     public void showDialog()
     {
+
+
+
         Log.e("ShowDialog","In show dialog");
         Payment newOrder = Dataholder.recentOrderList.get(0);
 
@@ -857,62 +885,111 @@ public class Homescreen_latest extends AppCompatActivity {
 
         dialog.show();
     }
+    public void continueAccept(){
+        Payment payment = Dataholder.recentOrderList.get(0);
 
-    public void acceptOrders()
-    {
         Date date = new Date();
         Timestamp acceptTimestamp = new Timestamp(date);
 
         Calendar cal = Calendar.getInstance();
-        cal.setTimeInMillis((acceptTimestamp.getSeconds()+time*60)*1000);
+        cal.setTimeInMillis((acceptTimestamp.getSeconds() + time * 60) * 1000);
 
         Timestamp zingTime = new Timestamp(cal.getTime());
-        Log.e("OrderAccepted","Order Accepted");
+        Log.e("OrderAccepted", "Order Accepted");
+
+        if (statusCode == -3) {
+            OrderCancelled(payment);
+        }
+        else {
+
+            db.collection("payment").document(payment.getId()).update("statusCode", 2, "zingTime", zingTime, "reactionTime", acceptTimestamp).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if (task.isSuccessful()) {
+                        //Toast.makeText(Homescreen_latest.this, "Order Accepted", Toast.LENGTH_SHORT).show();
+                        Log.e("OrderAccepted", Dataholder.recentOrderList.size() + " ");
+
+
+                        ModifyWithCaution(payment);
+
+
+                        getFCMToken(payment.getUserID(), "Order Accepted", "Your order of #" + payment.getPaymentOrderID().substring(payment.getPaymentOrderID().length() - 4) + " is Accepted");
+
+                    } else {
+                        Toast.makeText(Homescreen_latest.this, "Error", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+
+        }
+    }
+
+    public void acceptOrders() {
         Payment payment = Dataholder.recentOrderList.get(0);
 
-
-        db.collection("payment").document(payment.getId()).update("statusCode",2,"zingTime",zingTime, "reactionTime",acceptTimestamp).addOnCompleteListener(new OnCompleteListener<Void>() {
+        db.collection("payment").document(payment.getId()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if(task.isSuccessful())
-                {
-                    //Toast.makeText(Homescreen_latest.this, "Order Accepted", Toast.LENGTH_SHORT).show();
-                    Log.e("OrderAccepted",Dataholder.recentOrderList.size() + " " );
-                    getFCMToken(payment.getUserID(),"Order Accepted","Your order of #" +payment.getPaymentOrderID().substring(payment.getPaymentOrderID().length()-4)+  " is Accepted");
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        Payment payment = document.toObject(Payment.class);
+                        statusCode = payment.getStatusCode();
+                        continueAccept();
 
-                }
-                else
-                {
-                    Toast.makeText(Homescreen_latest.this, "Error", Toast.LENGTH_SHORT).show();
+                    }
+
                 }
             }
         });
+    }
+    public void continueDeny(){
+        Payment payment = Dataholder.recentOrderList.get(0);
+        Date date = new Date();
+        Timestamp acceptTimestamp = new Timestamp(date);
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis((acceptTimestamp.getSeconds() + time) * 1000);
+
+        Timestamp zingTime = new Timestamp(cal.getTime());
+
+        if (statusCode == -3) {
+            OrderCancelled(payment);
+        } else {
+
+            db.collection("payment").document(payment.getId()).update("statusCode", -1, "reactionTime", acceptTimestamp).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if (task.isSuccessful()) {
+                        Toast.makeText(Homescreen_latest.this, "Order Rejected", Toast.LENGTH_SHORT).show();
+                        RejectOrderWithCaution(payment);
+                        initRefund(payment);
+                    }
+                }
+            });
+
+        }
 
     }
 
-    public void DenyOrders()
-    {
-        Date date = new Date();
-        Timestamp acceptTimestamp = new Timestamp(date);
+    public void DenyOrders() {
 
-        Calendar cal = Calendar.getInstance();
-        cal.setTimeInMillis((acceptTimestamp.getSeconds()+time)*1000);
-
-        Timestamp zingTime = new Timestamp(cal.getTime());
         Payment payment = Dataholder.recentOrderList.get(0);
 
-
-        db.collection("payment").document(payment.getId()).update("statusCode",-1, "reactionTime",acceptTimestamp).addOnCompleteListener(new OnCompleteListener<Void>() {
+        db.collection("payment").document(payment.getId()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if(task.isSuccessful())
-                {
-                    Toast.makeText(Homescreen_latest.this, "Order Rejected", Toast.LENGTH_SHORT).show();
-                    initRefund(payment);
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        Payment payment = document.toObject(Payment.class);
+                        statusCode = payment.getStatusCode();
+                        continueDeny();
+                    }
+
                 }
             }
         });
-
     }
 
 
@@ -1001,8 +1078,11 @@ public class Homescreen_latest extends AppCompatActivity {
 
             if(Dataholder.recentOrderList.size()!=0)
                 showDialog();
-            else
+            else {
                 dialog.dismiss();
+                Refresh();
+
+            }
 
         }
         newOrdersAdapter.notifyDataSetChanged();
@@ -1024,8 +1104,9 @@ public class Homescreen_latest extends AppCompatActivity {
         {
             Dataholder.recentOrderList.remove(0);
             //Toast.makeText(this, "Dataholder Size" + Dataholder.recentOrderList.size(), Toast.LENGTH_SHORT).show();
-            if(Dataholder.recentOrderList.size()==0)
-                dialog.dismiss();
+            if(Dataholder.recentOrderList.size()==0){
+                dialog.cancel();
+                Refresh();}
             else
                 showDialog();
         }
@@ -1314,7 +1395,7 @@ public class Homescreen_latest extends AppCompatActivity {
         }
         if(flag==0)
         {
-            Toast.makeText(this, "Order Not Present", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "This order is not present", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -1433,8 +1514,8 @@ public class Homescreen_latest extends AppCompatActivity {
 
     public void contactSupport()
     {
-        String text = "Hi, my payment orderID is " + infoDialogPayment.getPaymentOrderID() + " placed by " + infoDialogPayment.getUserName() + " total amount: " + infoDialogPayment.getBasePrice() ;
-        String url = "https://api.whatsapp.com/send?phone=91" + Dataholder.support.getPhoneNumber()+ "&text=" + text;
+        String text = "Hi, this is " +Dataholder.outlet.getName() + ".  I request support for paymentOrderID " + infoDialogPayment.getPaymentOrderID() + " placed by " + infoDialogPayment.getUserName() + " total amount: " + infoDialogPayment.getBasePrice() ;
+        String url = "https://api.whatsapp.com/send?phone=" + Dataholder.support.getPhoneNumber()+ "&text=" + text;
         try {
             PackageManager pm = getApplicationContext().getPackageManager();
             pm.getPackageInfo("com.whatsapp", PackageManager.GET_ACTIVITIES);
@@ -1449,6 +1530,14 @@ public class Homescreen_latest extends AppCompatActivity {
         }
     }
 
+    public void Refresh()
+    {
+        Dataholder.preparingOrderList.clear();
+        Dataholder.recentOrderList.clear();
+        fetchOrders();
+    }
+
+
 
 
     @Override
@@ -1456,6 +1545,7 @@ public class Homescreen_latest extends AppCompatActivity {
         super.onStop();
         compositeDisposable.clear();
     }
+
 
 
 

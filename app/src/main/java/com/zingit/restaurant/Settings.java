@@ -71,6 +71,7 @@ public class Settings extends AppCompatActivity {
 
 
         itemRV = findViewById(R.id.itemsRV);
+        itemRV.setNestedScrollingEnabled(false);
         adapter = new ItemAdapter(itemList);
         itemRV.setAdapter(adapter);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
