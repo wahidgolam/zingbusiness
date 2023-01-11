@@ -11,6 +11,10 @@ public class Payment {
     private String outletID;
     String couponID;
 
+
+
+    String orderType;
+
     ArrayList<OrderItem> orderItems;
 
     String userName;
@@ -40,6 +44,21 @@ public class Payment {
         this.couponDiscount = couponDiscount;
         this.totalAmountPaid = totalAmountPaid;
         this.placedTime = placedTime;
+    }
+
+    public Payment(String userID, String userName, String outletID, String couponID, ArrayList<OrderItem> orderItems, int statusCode, double basePrice, double taxesAndCharges, double couponDiscount, double totalAmountPaid, Timestamp placedTime,String orderType) {
+        this.userID = userID;
+        this.userName = userName;
+        this.outletID = outletID;
+        this.couponID = couponID;
+        this.orderItems = orderItems;
+        this.statusCode = statusCode;
+        this.basePrice = basePrice;
+        this.taxesAndCharges = taxesAndCharges;
+        this.couponDiscount = couponDiscount;
+        this.totalAmountPaid = totalAmountPaid;
+        this.placedTime = placedTime;
+        this.orderType = orderType;
     }
 
     public Payment() {
@@ -179,6 +198,13 @@ public class Payment {
 
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+    public String getOrderType() {
+        return orderType;
+    }
+
+    public void setOrderType(String orderType) {
+        this.orderType = orderType;
     }
 }
 

@@ -1,6 +1,8 @@
 package com.zingit.restaurant;
 
 import android.content.Context;
+import android.text.SpannableString;
+import android.text.style.UnderlineSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -72,7 +74,10 @@ public class OrderItemAdapterLatest extends RecyclerView.Adapter<com.zingit.rest
 
             //render basic data
 
+            //holder.userName.setText(payment.getUserName());
+
             holder.userName.setText(payment.getUserName());
+
             String orderID = payment.getPaymentOrderID().substring(payment.getPaymentOrderID().length()-4);
             orderID = orderID.toUpperCase();
             holder.orderID.setText("Order "+"#"+orderID);
@@ -82,6 +87,8 @@ public class OrderItemAdapterLatest extends RecyclerView.Adapter<com.zingit.rest
 
             final String[] timerDetails = {""};
             final long[] secs = {0};
+
+
 
            // Toast.makeText(context, "" + payment.getStatusCode(), Toast.LENGTH_SHORT).show();
 
@@ -119,7 +126,7 @@ public class OrderItemAdapterLatest extends RecyclerView.Adapter<com.zingit.rest
                             Timestamp zingTime = payment.getZingTime();
                             Date date = new Date();
                             Timestamp nowTime = new Timestamp(date);
-                            Log.e("Difference", nowTime.getSeconds()/60.0 - zingTime.getSeconds()/60+" ");
+                            //Log.e("Difference", nowTime.getSeconds()/60.0 - zingTime.getSeconds()/60+" ");
                             secs[0] = zingTime.getSeconds() - nowTime.getSeconds();
                             if(secs[0]>0)
                             {

@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.Manifest;
 import android.app.ActivityManager;
 import android.app.Dialog;
 import android.content.Context;
@@ -50,8 +51,15 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionDeniedResponse;
+import com.karumi.dexter.listener.PermissionGrantedResponse;
+import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.single.PermissionListener;
 import com.ncorti.slidetoact.SlideToActView;
 import com.zingit.restaurant.model.FcmToken;
+import com.zingit.restaurant.model.OrderType;
 import com.zingit.restaurant.model.RefundToken;
 import com.zingit.restaurant.remote.FCMRetrofitClient;
 import com.zingit.restaurant.remote.FcmCloudFunction;
@@ -99,7 +107,7 @@ public class Homescreen_latest extends AppCompatActivity {
     RefundCloudFunction refundCloudFunction;
     Dialog infoDialog;
     //LinearLayout DialogOrderReady;
-    TextView DialogClose;
+    TextView contactUser;
     RecyclerView infoDialogOrderRV;
     NewOrdersAdapter newOrdersAdapter1;
     ArrayList<OrderItem> dialogOrdersList = new ArrayList<>();
@@ -142,6 +150,11 @@ public class Homescreen_latest extends AppCompatActivity {
 
     int statusCode;
 
+    TextView dialogOrderTypeText;
+    String orderType;
+
+    ArrayList<OrderType> orderTypeArrayList = new ArrayList<>();
+
 
 
 
@@ -160,6 +173,8 @@ public class Homescreen_latest extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_homescreen_latest);
+
+
 
 
 
@@ -208,10 +223,10 @@ public class Homescreen_latest extends AppCompatActivity {
 
         });
 
-        DialogClose.setOnClickListener(new View.OnClickListener() {
+        contactUser.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                OrderInfoDialogClose();
+                CallCustomer(infoDialogPayment.getUserID());
             }
         });
 
@@ -480,6 +495,14 @@ public class Homescreen_latest extends AppCompatActivity {
             window.setStatusBarColor(this.getResources().getColor(R.color.dark_orange));
         }
 
+        Dexter.withContext(this)
+                .withPermission(Manifest.permission.CALL_PHONE)
+                .withListener(new PermissionListener() {
+                    @Override public void onPermissionGranted(PermissionGrantedResponse response) {/* ... */}
+                    @Override public void onPermissionDenied(PermissionDeniedResponse response) {/* ... */}
+                    @Override public void onPermissionRationaleShouldBeShown(PermissionRequest permission, PermissionToken token) {/* ... */}
+                }).check();
+
         View view = getLayoutInflater().inflate(R.layout.new_order_dialog,null);
         dialog = new Dialog(Homescreen_latest.this, android.R.style.Theme_DeviceDefault_Light_NoActionBar );
         dialog.setContentView(R.layout.new_order_dialog);
@@ -495,6 +518,7 @@ public class Homescreen_latest extends AppCompatActivity {
         dialogOrderId = dialog.findViewById(R.id.orderId);
         dialogOrderTime = dialog.findViewById(R.id.orderTime);
         dialogUserName =dialog.findViewById(R.id.userName);
+        dialogOrderTypeText = dialog.findViewById(R.id.orderType);
 
         dialogHelp = dialog.findViewById(R.id.help);
         dialogOrderTotal = dialog.findViewById(R.id.orderTotal);
@@ -526,7 +550,7 @@ public class Homescreen_latest extends AppCompatActivity {
         fcmCloudFunction = FCMRetrofitClient.getRetrofitInstance().create(FcmCloudFunction.class);
 
         newOrdersAdapter1 = new NewOrdersAdapter(newOrderItemList);
-        DialogClose = infoDialog.findViewById(R.id.close);
+        contactUser = infoDialog.findViewById(R.id.close);
         //DialogOrderReady = infoDialog.findViewById(R.id.order_ready);
         infoDialogOrderId = infoDialog.findViewById(R.id.orderId);
 
@@ -573,6 +597,10 @@ public class Homescreen_latest extends AppCompatActivity {
 
         context = getApplicationContext();
 
+        //orderTypeText = findViewById(R.id.orderType);
+
+
+
 
 
 
@@ -614,6 +642,7 @@ public class Homescreen_latest extends AppCompatActivity {
                                     openOutlet.setText("Online");
                                     openOutlet.setChecked(true);
                                     orderRVLayout.setVisibility(View.GONE);
+                                    orderEmptyView.setVisibility(View.VISIBLE);
                                     orderEmptyView.setVisibility(View.VISIBLE);
                                     orderEmptyImage.setBackgroundResource(R.drawable.store_openimg);
                                     /*
@@ -847,8 +876,6 @@ public class Homescreen_latest extends AppCompatActivity {
     public void showDialog()
     {
 
-
-
         Log.e("ShowDialog","In show dialog");
         Payment newOrder = Dataholder.recentOrderList.get(0);
 
@@ -878,17 +905,12 @@ public class Homescreen_latest extends AppCompatActivity {
         dialogOrderTime.setText("Today at " + orderTime);
         time = 15; // default time for all orders
 
+        /*if(orderTypeArrayList.size()>0)
+        {
+            dialogOrderTypeText.setText("Order Type: " + orderTypeArrayList.get(0).getOrderType());
+        }*/
 
-
-
-
-
-
-
-
-
-
-
+        dialogOrderTypeText.setText("Order Type: " + payment.getOrderType());
 
 
         dialogNoOfOrders.setText(Dataholder.recentOrderList.size()+"");
@@ -1028,9 +1050,22 @@ public class Homescreen_latest extends AppCompatActivity {
 
             Dataholder.recentOrderList.add(added_payment);
         }
-        if(Dataholder.recentOrderList.size()>0){
-            showDialog();
-        }
+        /*if(Dataholder.recentOrderList.size()>0){
+            db.collection("orderType").whereEqualTo("paymentOrderID",Dataholder.recentOrderList.get(0).getPaymentOrderID()).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        OrderType orderType = document.toObject(OrderType.class);
+                        orderTypeArrayList.add(orderType);
+                        Log.e("orderType",orderType.getOrderType());
+                    }
+                    showDialog();
+
+                }
+            });
+
+
+        }*/
         orderItemAdapterLatest.notifyDataSetChanged();
 
     }
@@ -1552,6 +1587,36 @@ public class Homescreen_latest extends AppCompatActivity {
         Dataholder.preparingOrderList.clear();
         Dataholder.recentOrderList.clear();
         fetchOrders();
+    }
+
+    public void CallCustomer(String userID)
+    {
+
+        db.collection("studentUser").document(userID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if(task.isSuccessful())
+                {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        StudentWithFCM studentWithFCM = task.getResult().toObject(StudentWithFCM.class);
+                        Intent callIntent = new Intent(Intent.ACTION_CALL);
+                        String phoneNumber = studentWithFCM.getPhoneNumber();
+
+
+
+
+                        if(phoneNumber.length()>=10){
+                            Log.e("PhoneNumber", studentWithFCM.getPhoneNumber());
+                            callIntent.setData(Uri.parse("tel:"+studentWithFCM.getPhoneNumber()));
+                        startActivity(callIntent);}
+                    }
+
+
+
+                }
+            }
+        });
     }
 
 

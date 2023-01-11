@@ -46,7 +46,7 @@ public class NewOrdersAdapter extends RecyclerView.Adapter<com.zingit.restaurant
 
 
 
-        holder.itemPrice.setText("₹ "+item.getItemQuantity()*item.getItemTotal());
+        holder.itemPrice.setText("₹ "+ item.getItemTotal());
         holder.itemQuantity.setText(item.getItemQuantity() + "x");
         String itemNameFormatted = FormatItemName(item.getItemName());
         itemNameFormatted = camelCase(itemNameFormatted);

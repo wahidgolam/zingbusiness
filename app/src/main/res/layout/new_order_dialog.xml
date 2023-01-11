@@ -4,6 +4,11 @@
     android:layout_height="match_parent"
     android:background="#43B985">
 
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -63,12 +68,23 @@
             android:textSize="18sp"
             android:textColor="#166643"/>
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textView2"
+            android:text="Order Type : TakeAway"
+            android:layout_centerHorizontal="true"
+            android:id="@+id/orderType"
+            android:layout_marginTop="4dp"
+            android:textSize="16sp"
+            android:fontFamily="@font/duplet_bold"/>
+
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/textView2"
+            android:layout_below="@id/orderType"
             android:layout_marginHorizontal="24dp"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="10dp"
             android:background="@drawable/rad_8back"
             android:paddingVertical="15dp">
 
@@ -270,12 +286,6 @@
 
     </RelativeLayout>
 
-
-
-
-
-
-
-
+    </ScrollView>
 
 </RelativeLayout>
