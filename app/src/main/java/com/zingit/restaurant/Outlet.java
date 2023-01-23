@@ -14,7 +14,21 @@ public class Outlet {
     private String zingTime;
     private int numOrders;
 
-    public Outlet(String name, String openStatus, String outletImage, String description, int category, String campusID, String id, String zingTime) {
+    private int deliveryCharges;
+    private Boolean isDelivery;
+
+
+
+    private Boolean isTakeAway;
+    private Boolean isDinein;
+    private int takeAwayCharges;
+
+
+
+    private Boolean isPrinterAvailable;
+
+
+    public Outlet(String name, String openStatus, String outletImage, String description, int category, String campusID, String id, String zingTime,int deliveryCharges,boolean isDelivery,boolean isTakeAway,boolean isDinein, int takeAwayCharges,Boolean isPrinterAvailable) {
         this.name = name;
         this.openStatus = openStatus;
         this.outletImage = outletImage;
@@ -23,6 +37,13 @@ public class Outlet {
         this.campusID = campusID;
         this.id = id;
         this.zingTime = zingTime;
+        this.deliveryCharges = deliveryCharges;
+        this.isDelivery = isDelivery;
+        this.isTakeAway = isTakeAway;
+        this.isDinein = isDinein;
+        this.takeAwayCharges = takeAwayCharges;
+        this.isPrinterAvailable = isPrinterAvailable;
+
     }
 
     public Outlet() {
@@ -74,5 +95,52 @@ public class Outlet {
 
     public void setNumOrders(int numOrders) {
         this.numOrders = numOrders;
+    }
+    public int getDeliveryCharges() {
+        return deliveryCharges;
+    }
+
+    public void setDeliveryCharges(int deliveryCharges) {
+        this.deliveryCharges = deliveryCharges;
+    }
+
+    public Boolean getDelivery() {
+        return isDelivery;
+    }
+
+    public void setDelivery(Boolean delivery) {
+        isDelivery = delivery;
+    }
+
+    public Boolean getTakeAway() {
+        return isTakeAway;
+    }
+
+    public void setTakeAway(Boolean takeAway) {
+        isTakeAway = takeAway;
+    }
+
+    public Boolean getDinein() {
+        return isDinein;
+    }
+
+    public void setDinein(Boolean dinein) {
+        isDinein = dinein;
+    }
+
+    public int getTakeAwayCharges() {
+        return takeAwayCharges;
+    }
+
+    public void setTakeAwayCharges(int takeAwayCharges) {
+        this.takeAwayCharges = takeAwayCharges;
+    }
+
+    public Boolean getisPrinterAvailable() {
+        return isPrinterAvailable;
+    }
+
+    public void setisPrinterAvailable(Boolean printerAvailable) {
+        isPrinterAvailable = printerAvailable;
     }
 }

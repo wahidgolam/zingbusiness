@@ -4,16 +4,21 @@ import com.google.firebase.Timestamp;
 
 import java.util.ArrayList;
 
+
+import com.google.firebase.Timestamp;
+
+import java.util.ArrayList;
+
 public class Payment {
+
     String id;
     String paymentOrderID;
+
+
+
     String userID;
     private String outletID;
     String couponID;
-
-
-
-    String orderType;
 
     ArrayList<OrderItem> orderItems;
 
@@ -31,6 +36,11 @@ public class Payment {
     Timestamp reactionTime;
     Timestamp preparedTime;
     Timestamp collectedTime;
+    String orderType;
+
+
+
+    Double paidByWallet;
 
     public Payment(String userID, String userName, String outletID, String couponID, ArrayList<OrderItem> orderItems, int statusCode, double basePrice, double taxesAndCharges, double couponDiscount, double totalAmountPaid, Timestamp placedTime) {
         this.userID = userID;
@@ -46,23 +56,33 @@ public class Payment {
         this.placedTime = placedTime;
     }
 
-    public Payment(String userID, String userName, String outletID, String couponID, ArrayList<OrderItem> orderItems, int statusCode, double basePrice, double taxesAndCharges, double couponDiscount, double totalAmountPaid, Timestamp placedTime,String orderType) {
+    public Payment(String id, String paymentOrderID, String userID, String outletID, String couponID, ArrayList<OrderItem> orderItems, String userName, int statusCode, double basePrice, double taxesAndCharges, double couponDiscount, double totalAmountPaid, Timestamp zingTime, Timestamp placedTime, Timestamp reactionTime, Timestamp preparedTime, Timestamp collectedTime, String orderType,double paidByWallet) {
+        this.id = id;
+        this.paymentOrderID = paymentOrderID;
         this.userID = userID;
-        this.userName = userName;
         this.outletID = outletID;
         this.couponID = couponID;
         this.orderItems = orderItems;
+        this.userName = userName;
         this.statusCode = statusCode;
         this.basePrice = basePrice;
         this.taxesAndCharges = taxesAndCharges;
         this.couponDiscount = couponDiscount;
         this.totalAmountPaid = totalAmountPaid;
+        this.zingTime = zingTime;
         this.placedTime = placedTime;
+        this.reactionTime = reactionTime;
+        this.preparedTime = preparedTime;
+        this.collectedTime = collectedTime;
         this.orderType = orderType;
+        this.paidByWallet = paidByWallet;
     }
 
     public Payment() {
     }
+
+    /*public Payment(String userID, String firstName, String cartOutletID, String s, ArrayList<OrderItem> orderItems, int i, long cartTotal, double v, double v1, double v2, Timestamp placedTime, String orderType) {
+    }*/
 
     public String getId() {
         return id;
@@ -199,6 +219,7 @@ public class Payment {
     public void setUserName(String userName) {
         this.userName = userName;
     }
+
     public String getOrderType() {
         return orderType;
     }
@@ -206,5 +227,12 @@ public class Payment {
     public void setOrderType(String orderType) {
         this.orderType = orderType;
     }
-}
 
+    public Double getPaidByWallet() {
+        return paidByWallet;
+    }
+
+    public void setPaidByWallet(Double paidByWallet) {
+        this.paidByWallet = paidByWallet;
+    }
+}

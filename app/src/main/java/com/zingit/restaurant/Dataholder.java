@@ -15,4 +15,5 @@ public class Dataholder {
     public static Earnings earnings = new Earnings();
     public static Support support ;
     public static int inAppServiceIntentCall=0;
+    public static Payment printingPayment;
 }

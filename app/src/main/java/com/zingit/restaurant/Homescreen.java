@@ -487,7 +487,7 @@ public class Homescreen extends AppCompatActivity {
         int zingTimeInt = Integer.parseInt(zingTimeString);
         Log.d("2", String.valueOf(zingTimeInt));
         //get zing time
-        int num_orders = currentOutlet.getNumOrders();
+        int num_orders = (int) currentOutlet.getNumOrders();
         Log.d("3", String.valueOf(num_orders));
         if(num_orders<5){
             zingTimeInt = (zingTimeInt*num_orders++ + (int)((zingTime.getSeconds()-order.getPlacedTime().getSeconds())/60.0))/num_orders;
