@@ -21,6 +21,12 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 import com.bumptech.glide.Glide;
+import com.dantsu.escposprinter.EscPosPrinter;
+import com.dantsu.escposprinter.connection.bluetooth.BluetoothPrintersConnections;
+import com.dantsu.escposprinter.exceptions.EscPosBarcodeException;
+import com.dantsu.escposprinter.exceptions.EscPosConnectionException;
+import com.dantsu.escposprinter.exceptions.EscPosEncodingException;
+import com.dantsu.escposprinter.exceptions.EscPosParserException;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.EventListener;
@@ -37,12 +43,18 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
+
+
+
+
+
 public class NotifService extends Service {
 
     FirebaseFirestore db;
     String outletID;
     Intent notificationIntent;
     ArrayList<Payment> orderList;
+    EscPosPrinter printer = null;
 
     @Override
     public void onCreate() {
@@ -197,6 +209,10 @@ public class NotifService extends Service {
         if(flag==0)
         {
             orderList.add(payment);
+            if(Dataholder.outlet.getisPrinterAvailable()) {
+                printSlip(payment);
+                printSlip(payment);
+            }
 
             try
             {sendNotification("New Order", "You have an order from " + payment.getUserName());}
@@ -422,6 +438,99 @@ public class NotifService extends Service {
     private static int number = 10000;
     public int getNextUniqueRandomNumber() {
         return number++;
+    }
+
+    public String createPrintSlip(Payment payment)
+    {
+        String slip ="[C]<font size='big'>      ZING</font>";
+        //slip = "[C]<img>" + PrinterTextParserImg.bitmapToHexadecimalString(printer, this.getApplicationContext().getResources().getDrawableForDensity(R.drawable.logo_orange, DisplayMetrics.DENSITY_MEDIUM))+"</img>\n";
+        slip += "[L]\n";
+        slip += "[L]<b>Order type : ";
+        slip += "[R]<font size='big'>        " + payment.getOrderType() + "</font>\n";
+        slip += "[L]<b>" + "Order ID : ";
+        slip += "[R]<font size='big'>        " +   "#" + payment.getPaymentOrderID().substring(payment.getPaymentOrderID().length()-4) + "</font>\n";
+        slip += "[L]<b>" + "Order From : ";
+        slip += "[R]<font size='big'>        " + payment.getUserName() + "</font>\n";
+        //slip += "[L]<font size='big'>" + Dataholder.printingPayment.orderType + "           #" + Dataholder.printingPayment.getPaymentOrderID().substring(Dataholder.printingPayment.getPaymentOrderID().length()-4) + "</font>\n";
+        //slip += "[L]<font size='big'>Order from        " + Dataholder.printingPayment.getUserName().toUpperCase() + "</font>\n";
+        //Add phone no here
+        slip += "[C]<b>=========================================\n";
+
+        for(int i=0;i<payment.getOrderItems().size();i++)
+        {
+            slip += "[L]<font size='big-4'>" + payment.getOrderItems().get(i).getItemName() + "</font>";
+            slip += "[R]<font size='big-4'> X" + payment.getOrderItems().get(i).getItemQuantity() + "</font>\n\n";
+        }
+        slip += "[C]<b>=========================================\n";
+
+        slip += "[R]<font size='big-4'>     Total Amount: " + payment.getBasePrice() + "</font>\n";
+
+
+
+        return slip;
+
+    }
+
+
+    /*public void startPrintingProcess()
+    {
+        Pos pos = new Pos();
+    }*/
+
+
+
+    public void printSlip(Payment payment)
+    {
+
+        String slip = createPrintSlip(payment);
+        try {
+            printer = new EscPosPrinter(BluetoothPrintersConnections.selectFirstPaired(), 203, 72f, 32);
+        } catch (EscPosConnectionException e) {
+            e.printStackTrace();
+        }
+        try{
+            printer.printFormattedText(slip);
+
+          /*  printer
+                    .printFormattedText(
+                            "[C]<img size='30'>https://zammit.s3-eu-west-1.amazonaws.com/website_assets/images/000/059/073/large/image.png?1664184913" +"</img>\n" +
+                                    "[L]\n" +
+                                    "[C]<u><font size='big'>ORDER N°045</font></u>\n" +
+                                    "[L]\n" +
+                                    "[C]================================\n" +
+                                    "[L]\n" +
+                                    "[L]<b>BEAUTIFUL SHIRT</b>[R]9.99e\n" +
+                                    "[L]  + Size : S\n" +
+                                    "[L]\n" +
+                                    "[L]<b>AWESOME HAT</b>[R]24.99e\n" +
+                                    "[L]  + Size : 57/58\n" +
+                                    "[L]\n" +
+                                    "[C]--------------------------------\n" +
+                                    "[R]TOTAL PRICE :[R]34.98e\n" +
+                                    "[R]TAX :[R]4.23e\n" +
+                                    "[L]\n" +
+                                    "[C]================================\n" +
+                                    "[L]\n" +
+                                    "[L]<font size='tall'>Customer :</font>\n" +
+                                    "[L]Raymond DUPONT\n" +
+                                    "[L]5 rue des girafes\n" +
+                                    "[L]31547 PERPETES\n" +
+                                    "[L]Tel : +33801201456\n" +
+                                    "[L]\n" +
+                                    "[C]<barcode type='ean13' height='10'>831254784551</barcode>\n" +
+                                    "[C]<qrcode size='20'>http://www.developpeur-web.dantsu.com/</qrcode>"
+                    );*/
+        } catch (EscPosEncodingException e) {
+            e.printStackTrace();
+        } catch (EscPosBarcodeException e) {
+            e.printStackTrace();
+        } catch (EscPosParserException e) {
+            e.printStackTrace();
+        } catch (EscPosConnectionException e) {
+            e.printStackTrace();
+        }
+
+
     }
 
 

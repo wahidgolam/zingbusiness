@@ -4,6 +4,7 @@ public class OrderType {
 
     String orderType;
     String paymentOrderID;
+
     public OrderType(String orderType, String paymentOrderID) {
         this.orderType = orderType;
         this.paymentOrderID = paymentOrderID;

@@ -960,12 +960,12 @@ public class Homescreen_latest extends AppCompatActivity {
 
                         Log.e("IsPrinterAvailable", Dataholder.outlet.getisPrinterAvailable() + " ");
 
-                        if(Dataholder.outlet.getisPrinterAvailable())   // check if the shop has printer or not
+                        /*if(Dataholder.outlet.getisPrinterAvailable())   // check if the shop has printer or not
                         {
 
-                            printSlip();
-                            printSlip();
-                        }
+                            //printSlip();
+                            //printSlip();
+                        }*/
 
 
                         ModifyWithCaution(payment);

@@ -13,6 +13,7 @@ import com.dantsu.escposprinter.exceptions.EscPosEncodingException;
 import com.dantsu.escposprinter.exceptions.EscPosParserException;
 import com.dantsu.escposprinter.textparser.PrinterTextParserImg;
 
+
 public class PrintSlip extends AppCompatActivity {
 
     @Override
@@ -21,6 +22,7 @@ public class PrintSlip extends AppCompatActivity {
         setContentView(R.layout.activity_print_slip);
 
         EscPosPrinter printer = null;
+
         try {
             printer = new EscPosPrinter(BluetoothPrintersConnections.selectFirstPaired(), 203, 72f, 32);
         } catch (EscPosConnectionException e) {
@@ -56,6 +58,9 @@ public class PrintSlip extends AppCompatActivity {
                                     "[C]<barcode type='ean13' height='10'>831254784551</barcode>\n" +
                                     "[C]<qrcode size='20'>http://www.developpeur-web.dantsu.com/</qrcode>"
                     );
+
+
+
         } catch (EscPosConnectionException e) {
             e.printStackTrace();
         } catch (EscPosParserException e) {
