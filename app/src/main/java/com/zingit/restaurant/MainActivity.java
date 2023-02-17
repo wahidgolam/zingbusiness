@@ -57,11 +57,12 @@ public class MainActivity extends AppCompatActivity {
                     userConcerned.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                         @Override
                         public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                            if (task.isSuccessful()) {
+                            if (task.isComplete()) {
                                 DocumentSnapshot document = task.getResult();
                                 if (document.exists()) {
                                     //set Data-holder
                                     Dataholder.ownerUser = document.toObject(OwnerUser.class);
+                                    Log.e("OwnerLogin", Dataholder.ownerUser.getEmail());
                                     Intent intent = new Intent(getApplicationContext(), Homescreen_latest.class);
                                     startActivity(intent);
                                     finish();

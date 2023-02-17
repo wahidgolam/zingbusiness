@@ -21,6 +21,8 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.Time;
@@ -191,9 +193,8 @@ public class Homescreen_latest extends AppCompatActivity {
 
 
         //printSlip();
-        browseBluetoothDevice();
+        //browseBluetoothDevice();
         setupUI();
-
 
 
         dialogAcceptOrder.setOnClickListener(new View.OnClickListener() {
@@ -261,6 +262,7 @@ public class Homescreen_latest extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable editable) {
+                if(editable!=null)
                 filter(editable.toString());
             }
 
@@ -637,10 +639,15 @@ public class Homescreen_latest extends AppCompatActivity {
         context = getApplicationContext();
 
         //orderTypeText = findViewById(R.id.orderType);
-
-
-        fetchOutletDetails();
-        fetchOrders();
+        final Handler handler = new Handler(Looper.getMainLooper());
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                //Do something after 100ms
+                fetchOutletDetails();
+                fetchOrders();
+            }
+        }, 1000);
 
 
     }
@@ -971,6 +978,7 @@ public class Homescreen_latest extends AppCompatActivity {
                         Log.e("OrderAccepted", Dataholder.recentOrderList.size() + " ");
 
                         Log.e("IsPrinterAvailable", Dataholder.outlet.getisPrinterAvailable() + " ");
+                        checkPermissions();
                         printBluetooth();
 
                         if(Dataholder.outlet.getisPrinterAvailable())   // check if the shop has printer or not
@@ -1706,44 +1714,30 @@ public class Homescreen_latest extends AppCompatActivity {
     }
 
     public AsyncEscPosPrinter getAsyncEscPosPrinter(DeviceConnection printerConnection) {
+        String slip = createPrintSlip();
         SimpleDateFormat format = new SimpleDateFormat("'on' yyyy-MM-dd 'at' HH:mm:ss");
         AsyncEscPosPrinter printer = new AsyncEscPosPrinter(printerConnection, 203, 48f, 32);
-        return printer.addTextToPrint(
-                "[C]<img>" + PrinterTextParserImg.bitmapToHexadecimalString(printer, this.getApplicationContext().getResources().getDrawableForDensity(R.drawable.zing_business_logo, DisplayMetrics.DENSITY_MEDIUM)) + "</img>\n" +
-                        "[L]\n" +
-                        "[C]<u><font size='big'>ORDER N°045</font></u>\n" +
-                        "[L]\n" +
-                        "[C]<u type='double'>" + format.format(new Date()) + "</u>\n" +
-                        "[C]\n" +
-                        "[C]================================\n" +
-                        "[L]\n" +
-                        "[L]<b>BEAUTIFUL SHIRT</b>[R]9.99€\n" +
-                        "[L]  + Size : S\n" +
-                        "[L]\n" +
-                        "[L]<b>AWESOME HAT</b>[R]24.99€\n" +
-                        "[L]  + Size : 57/58\n" +
-                        "[L]\n" +
-                        "[C]--------------------------------\n" +
-                        "[R]TOTAL PRICE :[R]34.98€\n" +
-                        "[R]TAX :[R]4.23€\n" +
-                        "[L]\n" +
-                        "[C]================================\n" +
-                        "[L]\n" +
-                        "[L]<u><font color='bg-black' size='tall'>Customer :</font></u>\n" +
-                        "[L]Raymond DUPONT\n" +
-                        "[L]5 rue des girafes\n" +
-                        "[L]31547 PERPETES\n" +
-                        "[L]Tel : +33801201456\n" +
-                        "\n" +
-                        "[C]<barcode type='ean13' height='10'>831254784551</barcode>\n" +
-                        "[L]\n" +
-                        "[C]<qrcode size='20'>http://www.developpeur-web.dantsu.com/</qrcode>\n"
-        );
+        return printer.addTextToPrint(slip);
     }
 
-
-
-
+    private void checkPermissions(){
+        int permission1 = ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        int permission2 = ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN);
+        if (permission1 != PackageManager.PERMISSION_GRANTED) {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(
+                    this,
+                    new String[]{Manifest.permission.BLUETOOTH_CONNECT},
+                    1
+            );
+        } else if (permission2 != PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(
+                    this,
+                    new String[]{Manifest.permission.BLUETOOTH_CONNECT},
+                    1
+            );
+        }
+    }
 
 
 
