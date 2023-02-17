@@ -3,6 +3,7 @@ package com.zingit.restaurant;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -10,8 +11,10 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.Manifest;
 import android.app.ActivityManager;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
@@ -26,6 +29,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.AbsListView;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -37,6 +41,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dantsu.escposprinter.EscPosPrinter;
+import com.dantsu.escposprinter.connection.DeviceConnection;
+import com.dantsu.escposprinter.connection.bluetooth.BluetoothConnection;
 import com.dantsu.escposprinter.connection.bluetooth.BluetoothPrintersConnections;
 import com.dantsu.escposprinter.exceptions.EscPosBarcodeException;
 import com.dantsu.escposprinter.exceptions.EscPosConnectionException;
@@ -73,6 +79,9 @@ import com.zingit.restaurant.remote.FCMRetrofitClient;
 import com.zingit.restaurant.remote.FcmCloudFunction;
 import com.zingit.restaurant.remote.RefundCloudFunction;
 import com.zingit.restaurant.remote.RefundRetrofitClient;
+import com.zingit.restaurant.utils.AsyncBluetoothEscPosPrint;
+import com.zingit.restaurant.utils.AsyncEscPosPrint;
+import com.zingit.restaurant.utils.AsyncEscPosPrinter;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -110,7 +119,7 @@ public class Homescreen_latest extends AppCompatActivity {
     TextView dialogAcceptOrder;
     NewOrdersAdapter newOrdersAdapter;
     ArrayList<OrderItem> newOrderItemList;
-    int counter=0;
+    int counter = 0;
     FcmCloudFunction fcmCloudFunction;
     RefundCloudFunction refundCloudFunction;
     Dialog infoDialog;
@@ -130,7 +139,7 @@ public class Homescreen_latest extends AppCompatActivity {
     ImageView orderEmptyImage;
     ImageView earnings;
     TextView infoDialogUserName;
-    ImageView home,earning,settings;
+    ImageView home, earning, settings;
     String FCMToken = "";
     LinearLayout infoOrderReady;
     RelativeLayout infoSwipeToDispatch;
@@ -148,7 +157,7 @@ public class Homescreen_latest extends AppCompatActivity {
     TextView zingText;
     ImageView zingBusinessLogo;
 
-    RelativeLayout registerPartner,logout;
+    RelativeLayout registerPartner, logout;
     FirebaseAuth mAuth;
     FloatingActionButton qr_code;
 
@@ -160,28 +169,22 @@ public class Homescreen_latest extends AppCompatActivity {
 
     TextView dialogOrderTypeText;
 
-    EscPosPrinter printer = null;
-
-
-
-
-
-
+    private BluetoothConnection selectedDevice;
 
 
     int time; //default time for accepting order
 
     CompositeDisposable compositeDisposable;
-
-
-
+    public static final int PERMISSION_BLUETOOTH = 1;
+    public static final int PERMISSION_BLUETOOTH_ADMIN = 2;
+    public static final int PERMISSION_BLUETOOTH_CONNECT = 3;
+    public static final int PERMISSION_BLUETOOTH_SCAN = 4;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_homescreen_latest);
-
 
 
         //printSlip();
@@ -203,14 +206,11 @@ public class Homescreen_latest extends AppCompatActivity {
         dialogAddTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(time>=60)
-                {
+                if (time >= 60) {
                     Toast.makeText(Homescreen_latest.this, "Time cannot exceed 60 mins", Toast.LENGTH_SHORT).show();
-                }
-                else
-                {
-                    time+=5;
-                    dialogZingTime.setText( time + " mins");
+                } else {
+                    time += 5;
+                    dialogZingTime.setText(time + " mins");
                 }
 
             }
@@ -221,9 +221,7 @@ public class Homescreen_latest extends AppCompatActivity {
                 if (time > 5) {
                     time -= 5;
                     dialogZingTime.setText(time + " mins");
-                }
-                else
-                {
+                } else {
                     Toast.makeText(Homescreen_latest.this, "Time cannot be less than 5", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -262,11 +260,9 @@ public class Homescreen_latest extends AppCompatActivity {
 
             private void filter(String toString) {
                 ArrayList<Payment> paymentList = new ArrayList<>();
-                for(Payment payments : Dataholder.preparingOrderList)
-                {
+                for (Payment payments : Dataholder.preparingOrderList) {
                     String orderId = payments.getPaymentOrderID();
-                    if(orderId.substring(orderId.length()-4).toLowerCase().contains(toString.toLowerCase()))
-                    {
+                    if (orderId.substring(orderId.length() - 4).toLowerCase().contains(toString.toLowerCase())) {
                         paymentList.add(payments);
 
                     }
@@ -312,7 +308,6 @@ public class Homescreen_latest extends AppCompatActivity {
         });*/
 
 
-
         openOutlet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -326,20 +321,17 @@ public class Homescreen_latest extends AppCompatActivity {
                     //Toast.makeText(Homescreen_latest.this, "OPEN", Toast.LENGTH_SHORT).show();
                     openOutlet.setText("Online");
 
-                }
-                else {
+                } else {
 
-                    if(Dataholder.preparingOrderList.size()==0)   // To close a shop first check if it has pending orders or not
+                    if (Dataholder.preparingOrderList.size() == 0)   // To close a shop first check if it has pending orders or not
                     {
                         //Toast.makeText(Homescreen_latest.this, "CLOSED", Toast.LENGTH_SHORT).show();
                         openOutlet.setText("Offline");
                         stopService();
                         UpdateOutletStatus(outletStatus);
 
-                    }
-                    else
-                    {
-                       // Toast.makeText(Homescreen_latest.this, "" + Dataholder.preparingOrderList.size() + "  " +  Dataholder.preparingOrderList.get(0).getId(), Toast.LENGTH_SHORT).show();
+                    } else {
+                        // Toast.makeText(Homescreen_latest.this, "" + Dataholder.preparingOrderList.size() + "  " +  Dataholder.preparingOrderList.get(0).getId(), Toast.LENGTH_SHORT).show();
                         Log.e("PreparingList", Dataholder.preparingOrderList.get(0) + " ");
                         openOutlet.setChecked(true);
                         Toast.makeText(Homescreen_latest.this, "Cannot close shop with orders pending", Toast.LENGTH_SHORT).show();
@@ -353,14 +345,14 @@ public class Homescreen_latest extends AppCompatActivity {
         earning.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(),EarningScreen.class);
+                Intent intent = new Intent(getApplicationContext(), EarningScreen.class);
                 startActivity(intent);
             }
         });
         home.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(),Homescreen_latest.class);
+                Intent intent = new Intent(getApplicationContext(), Homescreen_latest.class);
                 startActivity(intent);
             }
         });
@@ -368,7 +360,7 @@ public class Homescreen_latest extends AppCompatActivity {
         settings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(),Settings.class);
+                Intent intent = new Intent(getApplicationContext(), Settings.class);
                 startActivity(intent);
             }
         });
@@ -385,8 +377,8 @@ public class Homescreen_latest extends AppCompatActivity {
         infoOrderReady.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-               infoDialog.dismiss();
-               OrderReadyDialog();
+                infoDialog.dismiss();
+                OrderReadyDialog();
 
 
             }
@@ -396,7 +388,7 @@ public class Homescreen_latest extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 mAuth.signOut();
-                Intent intent = new Intent(getApplicationContext(),Login.class);
+                Intent intent = new Intent(getApplicationContext(), Login.class);
                 startActivity(intent);
             }
         });
@@ -449,55 +441,37 @@ public class Homescreen_latest extends AppCompatActivity {
         });
 
 
-
-
-
     }
-
-
-
-
-
-
 
 
     public void OrderInfoDialogClose() {
         infoDialog.dismiss();
     }
 
-    public void OrderReadyDialog()
-    {
+    public void OrderReadyDialog() {
         payment = infoDialogPayment;
         //Payment payment1 = infoDialogPayment;
 
 
-         db.collection("payment").document(payment.getId()).update("statusCode",3).addOnCompleteListener(new OnCompleteListener<Void>() {
-             @Override
-             public void onComplete(@NonNull Task<Void> task) {
-                 if(task.isSuccessful())
-                 {
-                     getFCMToken(payment.getUserID(),"Order Prepared","Your order of # " +payment.getPaymentOrderID().substring(payment.getPaymentOrderID().length()-4)+  "is Prepared");
-                     orderItemAdapterLatest.notifyDataSetChanged();
+        db.collection("payment").document(payment.getId()).update("statusCode", 3).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    getFCMToken(payment.getUserID(), "Order Prepared", "Your order of # " + payment.getPaymentOrderID().substring(payment.getPaymentOrderID().length() - 4) + "is Prepared");
+                    orderItemAdapterLatest.notifyDataSetChanged();
                     // Toast.makeText(Homescreen_latest.this, "Ready to Dispatch", Toast.LENGTH_SHORT).show();
-                     infoDialog.dismiss();
-                     UpdateStatusCode(payment);
+                    infoDialog.dismiss();
+                    UpdateStatusCode(payment);
 
-                 }
-             }
-         });
+                }
+            }
+        });
     }
 
 
+    public void setupUI() {
 
-
-
-
-
-    public void setupUI()
-    {
-
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-        {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Window window = this.getWindow();
             window.setStatusBarColor(this.getResources().getColor(R.color.dark_orange));
         }
@@ -505,13 +479,18 @@ public class Homescreen_latest extends AppCompatActivity {
         Dexter.withContext(this)
                 .withPermission(Manifest.permission.CALL_PHONE)
                 .withListener(new PermissionListener() {
-                    @Override public void onPermissionGranted(PermissionGrantedResponse response) {/* ... */}
-                    @Override public void onPermissionDenied(PermissionDeniedResponse response) {/* ... */}
-                    @Override public void onPermissionRationaleShouldBeShown(PermissionRequest permission, PermissionToken token) {/* ... */}
+                    @Override
+                    public void onPermissionGranted(PermissionGrantedResponse response) {/* ... */}
+
+                    @Override
+                    public void onPermissionDenied(PermissionDeniedResponse response) {/* ... */}
+
+                    @Override
+                    public void onPermissionRationaleShouldBeShown(PermissionRequest permission, PermissionToken token) {/* ... */}
                 }).check();
 
-        View view = getLayoutInflater().inflate(R.layout.new_order_dialog,null);
-        dialog = new Dialog(Homescreen_latest.this, android.R.style.Theme_DeviceDefault_Light_NoActionBar );
+        View view = getLayoutInflater().inflate(R.layout.new_order_dialog, null);
+        dialog = new Dialog(Homescreen_latest.this, android.R.style.Theme_DeviceDefault_Light_NoActionBar);
         dialog.setContentView(R.layout.new_order_dialog);
         dialog.setCancelable(false);
 
@@ -520,11 +499,10 @@ public class Homescreen_latest extends AppCompatActivity {
         infoDialog.setCancelable(true);
 
 
-
         dialogNoOfOrders = dialog.findViewById(R.id.no_of_orders);
         dialogOrderId = dialog.findViewById(R.id.orderId);
         dialogOrderTime = dialog.findViewById(R.id.orderTime);
-        dialogUserName =dialog.findViewById(R.id.userName);
+        dialogUserName = dialog.findViewById(R.id.userName);
         dialogOrderTypeText = dialog.findViewById(R.id.orderType);
 
         dialogHelp = dialog.findViewById(R.id.help);
@@ -550,7 +528,6 @@ public class Homescreen_latest extends AppCompatActivity {
         infoDialogUserName = infoDialog.findViewById(R.id.userName);
 
 
-
         db = FirebaseFirestore.getInstance();
         compositeDisposable = new CompositeDisposable();
         refundCloudFunction = RefundRetrofitClient.getInstance().create(RefundCloudFunction.class);
@@ -564,8 +541,7 @@ public class Homescreen_latest extends AppCompatActivity {
         infoDialogOrderTotal = infoDialog.findViewById(R.id.orderTotal);
         infoDialogOrderRV = infoDialog.findViewById(R.id.dialogOrderRV);
         infoDialogOrderRV.setAdapter(newOrdersAdapter1);
-        infoDialogOrderRV.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL,false));
-
+        infoDialogOrderRV.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
 
 
         searchOrderId = findViewById(R.id.search_orderID);
@@ -607,17 +583,12 @@ public class Homescreen_latest extends AppCompatActivity {
         //orderTypeText = findViewById(R.id.orderType);
 
 
-
-
-
-
-
         fetchOutletDetails();
         fetchOrders();
 
 
-
     }
+
     private boolean isMyServiceRunning(Class<?> serviceClass) {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
@@ -629,7 +600,7 @@ public class Homescreen_latest extends AppCompatActivity {
     }
 
     public void fetchOutletDetails() {
-       // Toast.makeText(this, "Dataholder" + Dataholder.ownerUser.getOutletID(), Toast.LENGTH_SHORT).show();
+        // Toast.makeText(this, "Dataholder" + Dataholder.ownerUser.getOutletID(), Toast.LENGTH_SHORT).show();
         if (Dataholder.ownerUser.getOutletID() != null) {
 
             outletID = Dataholder.ownerUser.getOutletID();
@@ -661,7 +632,7 @@ public class Homescreen_latest extends AppCompatActivity {
                                     else{}
                                     */
 
-                                    if(!isMyServiceRunning(NotifService.class)){
+                                    if (!isMyServiceRunning(NotifService.class)) {
                                         serviceIntent.putExtra("outletID", currentOutlet.getId());
                                         ContextCompat.startForegroundService(getApplicationContext(), serviceIntent);
                                     }
@@ -688,8 +659,7 @@ public class Homescreen_latest extends AppCompatActivity {
                 }
             });
 
-        }
-        else   // Outlet Not Registered
+        } else   // Outlet Not Registered
         {
             navBar.setVisibility(View.INVISIBLE);
             orderRV.setVisibility(View.INVISIBLE);
@@ -707,56 +677,50 @@ public class Homescreen_latest extends AppCompatActivity {
             qr_code.setVisibility(View.GONE);
 
 
-
-
-
-
         }
     }
 
-    public void fetchOrders()
-    {
+    public void fetchOrders() {
         db = FirebaseFirestore.getInstance();
-        Query query = db.collection("payment").whereGreaterThan("statusCode", 0).whereLessThan("statusCode",4).whereEqualTo("outletID",outletID);
+        Query query = db.collection("payment").whereGreaterThan("statusCode", 0).whereLessThan("statusCode", 4).whereEqualTo("outletID", outletID);
 
         query.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
-                if(error!=null)
-                {
+                if (error != null) {
                     Log.e("Error", error.getLocalizedMessage());
                     return;
                 }
-                if(!value.isEmpty())
-                {
+                if (!value.isEmpty()) {
 
 
-                    for(DocumentChange dc : value.getDocumentChanges())
-                    {
-                        switch (dc.getType())
-                        {
+                    for (DocumentChange dc : value.getDocumentChanges()) {
+                        switch (dc.getType()) {
                             case ADDED:
                                 Payment added_payment = dc.getDocument().toObject(Payment.class);
                                 orderRVLayout.setVisibility(View.VISIBLE);
                                 orderEmptyView.setVisibility(View.GONE);
                                 orderEmptyImage.setBackgroundResource(R.drawable.store_openimg);
-                                switch(added_payment.getStatusCode()){
+                                switch (added_payment.getStatusCode()) {
 
-                                    case 1: Log.e("Added Payment", counter++ + " ");
+                                    case 1:
+                                        Log.e("Added Payment", counter++ + " ");
                                         Log.e("Added Orders", added_payment.getPaymentOrderID());
                                         AddWithCaution(added_payment);
-                                    break;
-                                    case 2: Log.e("Added", added_payment.getPaymentOrderID());
+                                        break;
+                                    case 2:
+                                        Log.e("Added", added_payment.getPaymentOrderID());
                                         AddPreparingWithCaution(added_payment);
-                                    break;
+                                        break;
 
-                                    case 3: AddPreparingWithCaution(added_payment);
+                                    case 3:
+                                        AddPreparingWithCaution(added_payment);
 
-                                    break;
+                                        break;
 
 
                                     default:
-                                        Log.e("Default","Default");
+                                        Log.e("Default", "Default");
                                 }
                                 orderItemAdapterLatest.notifyDataSetChanged();
                                 break;
@@ -764,30 +728,35 @@ public class Homescreen_latest extends AppCompatActivity {
                             case MODIFIED:
 
                                 Payment modified_payment = dc.getDocument().toObject(Payment.class);
-                                switch(modified_payment.getStatusCode()){
+                                switch (modified_payment.getStatusCode()) {
 
                                     case 1:
                                         break;
-                                    case 2: Log.e("Order Modified", "Case 2");
+                                    case 2:
+                                        Log.e("Order Modified", "Case 2");
                                         //ModifyWithCaution(modified_payment);
-                                    break;
-                                    case 3: Log.e("Order Modified", "Case 3");
+                                        break;
+                                    case 3:
+                                        Log.e("Order Modified", "Case 3");
                                         //UpdateStatusCode(modified_payment);
                                         break;
 
-                                    case 4: Log.e("Order Modified","Case 4");
-                                    break;
+                                    case 4:
+                                        Log.e("Order Modified", "Case 4");
+                                        break;
 
-                                    case -3: Log.e("Order Modified", "Case -3");
-                                             dialog.dismiss();
-                                             Refresh();
+                                    case -3:
+                                        Log.e("Order Modified", "Case -3");
+                                        dialog.dismiss();
+                                        Refresh();
 
 
-                                             Dataholder.recentOrderList.remove(0);
-                                             orderItemAdapterLatest.notifyDataSetChanged();
-                                             break;
+                                        Dataholder.recentOrderList.remove(0);
+                                        orderItemAdapterLatest.notifyDataSetChanged();
+                                        break;
 
-                                        default: Log.e("Modified","Modified");
+                                    default:
+                                        Log.e("Modified", "Modified");
 
 
                                 }
@@ -798,20 +767,19 @@ public class Homescreen_latest extends AppCompatActivity {
                             case REMOVED:
 
                                 Payment removed_payment = dc.getDocument().toObject(Payment.class);
-                                if(Dataholder.preparingOrderList.size()==0)
-                                {
+                                if (Dataholder.preparingOrderList.size() == 0) {
                                     orderRVLayout.setVisibility(View.GONE);
                                     orderEmptyView.setVisibility(View.VISIBLE);
                                     orderEmptyImage.setBackgroundResource(R.drawable.store_openimg);
                                 }
-                                switch(removed_payment.getStatusCode()){
+                                switch (removed_payment.getStatusCode()) {
 
                                     case 1: //RejectOrderWithCaution(removed_payment);
-                                    Log.e("Refund","Order Denied");
-                                    break;
-                                    case -3: OrderCancelled(removed_payment);
-                                    Log.e("Order Cancelled", "Order Cancelled");
-
+                                        Log.e("Refund", "Order Denied");
+                                        break;
+                                    case -3:
+                                        OrderCancelled(removed_payment);
+                                        Log.e("Order Cancelled", "Order Cancelled");
 
 
                                     default:
@@ -827,49 +795,46 @@ public class Homescreen_latest extends AppCompatActivity {
         });
 
     }
-        public void stopService(){
-            Intent serviceIntent = new Intent(this, NotifService.class);
-            stopService(serviceIntent);
-        }
 
-        public void OrderCancelled(Payment payment)
-        {
-            if(Dataholder.recentOrderList.size()>0){
+    public void stopService() {
+        Intent serviceIntent = new Intent(this, NotifService.class);
+        stopService(serviceIntent);
+    }
+
+    public void OrderCancelled(Payment payment) {
+        if (Dataholder.recentOrderList.size() > 0) {
             Dataholder.recentOrderList.remove(0);
 
-            if(Dataholder.recentOrderList.size()==0){
+            if (Dataholder.recentOrderList.size() == 0) {
                 dialog.cancel();
-                Refresh();}
-                Toast.makeText(this, "Last Order was Cancelled", Toast.LENGTH_SHORT).show();
-
-
+                Refresh();
             }
+            Toast.makeText(this, "Last Order was Cancelled", Toast.LENGTH_SHORT).show();
+
+
         }
+    }
 
     public void OrderComplete(Payment payment)   // Updating in database to status 4
     {
-        db.collection("payment").document(payment.getId()).update("statusCode",4).addOnCompleteListener(new OnCompleteListener<Void>() {
+        db.collection("payment").document(payment.getId()).update("statusCode", 4).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
 
                 //Toast.makeText(Homescreen_latest.this, "Order Dispatched", Toast.LENGTH_SHORT).show();
                 addEarning(payment);
                 CompletedOrders(payment.getPaymentOrderID());
-                if(Dataholder.preparingOrderList.size()==0)
-                {
+                if (Dataholder.preparingOrderList.size() == 0) {
                     orderRVLayout.setVisibility(View.GONE);
                     orderEmptyView.setVisibility(View.VISIBLE);
                     orderEmptyImage.setBackgroundResource(R.drawable.store_openimg);
                     infoDialog.dismiss();
                     orderItemAdapterLatest.notifyDataSetChanged();
-                }
-                else
-                {
+                } else {
                     Log.e("PreparingList", Dataholder.preparingOrderList.get(0).getId());
                 }
                 orderItemAdapterLatest.notifyDataSetChanged();
-                getFCMToken(payment.getUserID(),"Order Dispatched","Your order of #" +payment.getPaymentOrderID().substring(payment.getPaymentOrderID().length()-4)+  " is dispatched");
-
+                getFCMToken(payment.getUserID(), "Order Dispatched", "Your order of #" + payment.getPaymentOrderID().substring(payment.getPaymentOrderID().length() - 4) + " is dispatched");
 
 
             }
@@ -879,36 +844,29 @@ public class Homescreen_latest extends AppCompatActivity {
     }
 
 
+    public void showDialog() {
 
-    public void showDialog()
-    {
-
-        Log.e("ShowDialog","In show dialog");
+        Log.e("ShowDialog", "In show dialog");
         Payment newOrder = Dataholder.recentOrderList.get(0);
 
         Timestamp timestamp = newOrder.getPlacedTime();
         Date date = timestamp.toDate();
         DateFormat df = new SimpleDateFormat("HH:mm", Locale.US);
         String time_chat_s = df.format(date);
-        Log.e("PlacedTime" , time_chat_s);
-        String hh = time_chat_s.substring(0,2);
-        String am_pm="";
-        int hour=Integer.parseInt(hh);
-        if(hour<=11)
-        {
+        Log.e("PlacedTime", time_chat_s);
+        String hh = time_chat_s.substring(0, 2);
+        String am_pm = "";
+        int hour = Integer.parseInt(hh);
+        if (hour <= 11) {
             am_pm = "AM";
-        }
-        else if(hour>12)
-        {
+        } else if (hour > 12) {
             am_pm = "PM";
             hour = hour - 12;
-        }
-        else
-        {
+        } else {
             am_pm = "PM";
         }
 
-        String orderTime = hour + ":" + time_chat_s.substring(3,5) +" " +  am_pm;
+        String orderTime = hour + ":" + time_chat_s.substring(3, 5) + " " + am_pm;
         dialogOrderTime.setText("Today at " + orderTime);
         time = 15; // default time for all orders
 
@@ -918,10 +876,8 @@ public class Homescreen_latest extends AppCompatActivity {
         }*/
 
 
-
-
-        dialogNoOfOrders.setText(Dataholder.recentOrderList.size()+"");
-        String orderId =  newOrder.getPaymentOrderID().substring(newOrder.getPaymentOrderID().length()-4).toUpperCase();
+        dialogNoOfOrders.setText(Dataholder.recentOrderList.size() + "");
+        String orderId = newOrder.getPaymentOrderID().substring(newOrder.getPaymentOrderID().length() - 4).toUpperCase();
         dialogOrderId.setText("Order #" + orderId);
         dialogUserName.setText("from " + newOrder.getUserName());
         dialogOrderTotal.setText("₹ " + newOrder.getBasePrice());
@@ -932,7 +888,8 @@ public class Homescreen_latest extends AppCompatActivity {
 
         dialog.show();
     }
-    public void continueAccept(){
+
+    public void continueAccept() {
         Payment payment = Dataholder.recentOrderList.get(0);
 
         Dataholder.printingPayment = payment;
@@ -948,8 +905,7 @@ public class Homescreen_latest extends AppCompatActivity {
 
         if (statusCode == -3) {
             OrderCancelled(payment);
-        }
-        else {
+        } else {
 
             db.collection("payment").document(payment.getId()).update("statusCode", 2, "zingTime", zingTime, "reactionTime", acceptTimestamp).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
@@ -960,12 +916,13 @@ public class Homescreen_latest extends AppCompatActivity {
 
                         Log.e("IsPrinterAvailable", Dataholder.outlet.getisPrinterAvailable() + " ");
 
-                        /*if(Dataholder.outlet.getisPrinterAvailable())   // check if the shop has printer or not
+                        if(Dataholder.outlet.getisPrinterAvailable())   // check if the shop has printer or not
                         {
+                            printBluetooth();
 
-                            //printSlip();
-                            //printSlip();
-                        }*/
+
+                        }
+
 
 
                         ModifyWithCaution(payment);
@@ -1002,7 +959,8 @@ public class Homescreen_latest extends AppCompatActivity {
             }
         });
     }
-    public void continueDeny(){
+
+    public void continueDeny() {
         Payment payment = Dataholder.recentOrderList.get(0);
         Date date = new Date();
         Timestamp acceptTimestamp = new Timestamp(date);
@@ -1052,26 +1010,22 @@ public class Homescreen_latest extends AppCompatActivity {
     }
 
 
-    public void AddWithCaution(Payment added_payment)
-    {
+    public void AddWithCaution(Payment added_payment) {
 
         int flag = 0;
-        for( int i=0;i<Dataholder.recentOrderList.size();i++)
-        {
-            if(Dataholder.recentOrderList.get(i).getId().equals(added_payment.getId())){
+        for (int i = 0; i < Dataholder.recentOrderList.size(); i++) {
+            if (Dataholder.recentOrderList.get(i).getId().equals(added_payment.getId())) {
                 flag = 1;
                 break;
             }
         }
         orderItemAdapterLatest.orderAdded();
-        Log.d("Flag of new order", flag+"");
-        if(flag==0)
-        {
+        Log.d("Flag of new order", flag + "");
+        if (flag == 0) {
 
             Dataholder.recentOrderList.add(added_payment);
         }
-        if(Dataholder.recentOrderList.size()>0)
-        {
+        if (Dataholder.recentOrderList.size() > 0) {
             showDialog();
         }
         /*if(Dataholder.recentOrderList.size()>0){
@@ -1098,61 +1052,55 @@ public class Homescreen_latest extends AppCompatActivity {
     {
         Log.e("Order Completed", "Case 4");
         //Toast.makeText(this, "Order Completed", Toast.LENGTH_SHORT).show();
-       int i;
-       int flag=0;
-       for(i=0;i<Dataholder.preparingOrderList.size();i++)
-       {
-           if(Dataholder.preparingOrderList.get(i).getPaymentOrderID().equals(paymentOrderId))
-           {
-               flag=1;
-               break;
-           }
+        int i;
+        int flag = 0;
+        for (i = 0; i < Dataholder.preparingOrderList.size(); i++) {
+            if (Dataholder.preparingOrderList.get(i).getPaymentOrderID().equals(paymentOrderId)) {
+                flag = 1;
+                break;
+            }
 
-       }
-       if(flag==1)
-       {
-           if(Dataholder.preparingOrderList.size()==1){
-               Dataholder.preparingOrderList.clear();
-               orderItemAdapterLatest.notifyDataSetChanged();
-               //orderRV.setAdapter(orderItemAdapterLatest);
+        }
+        if (flag == 1) {
+            if (Dataholder.preparingOrderList.size() == 1) {
+                Dataholder.preparingOrderList.clear();
+                orderItemAdapterLatest.notifyDataSetChanged();
+                //orderRV.setAdapter(orderItemAdapterLatest);
 
-           }
-           else{
-               Dataholder.preparingOrderList.remove(i);
-               printElements(Dataholder.preparingOrderList);
-               orderItemAdapterLatest.notifyItemRemoved(i);
-           }
-       }
+            } else {
+                Dataholder.preparingOrderList.remove(i);
+                printElements(Dataholder.preparingOrderList);
+                orderItemAdapterLatest.notifyItemRemoved(i);
+            }
+        }
 
     }
-    public void printElements(ArrayList<Payment> paymentList){
-        for(Payment payment: paymentList){
-            Log.d("printElements", payment.getPaymentOrderID()+":"+payment.getStatusCode());
+
+    public void printElements(ArrayList<Payment> paymentList) {
+        for (Payment payment : paymentList) {
+            Log.d("printElements", payment.getPaymentOrderID() + ":" + payment.getStatusCode());
         }
     }
-    public void ModifyWithCaution(Payment modifiedPayment)
-    {
-        int flag=0;
 
-        for(int i=0;i<Dataholder.recentOrderList.size();i++)
-        {
-            if(Dataholder.recentOrderList.get(i).getId().equals(modifiedPayment.getId()))
-            {
+    public void ModifyWithCaution(Payment modifiedPayment) {
+        int flag = 0;
+
+        for (int i = 0; i < Dataholder.recentOrderList.size(); i++) {
+            if (Dataholder.recentOrderList.get(i).getId().equals(modifiedPayment.getId())) {
                 Log.e("Coming here", Dataholder.recentOrderList.size() + " ");
 
-                flag=1;
+                flag = 1;
                 break;
             }
         }
-        if(flag==1)
-        {
+        if (flag == 1) {
             AddPreparingWithCaution(Dataholder.recentOrderList.get(0));
             Log.e("Coming here", Dataholder.recentOrderList.size() + " ");
 
             Dataholder.recentOrderList.remove(0);
             Log.e("ModifyAfterRemoved", Dataholder.recentOrderList.size() + " ");
 
-            if(Dataholder.recentOrderList.size()!=0)
+            if (Dataholder.recentOrderList.size() != 0)
                 showDialog();
             else {
                 dialog.dismiss();
@@ -1165,44 +1113,37 @@ public class Homescreen_latest extends AppCompatActivity {
         orderItemAdapterLatest.notifyDataSetChanged();
     }
 
-    public void RejectOrderWithCaution(Payment payment)
-    {
-        int flag=0;
-        for(int i=0;i<Dataholder.recentOrderList.size();i++)
-        {
-            if(Dataholder.recentOrderList.get(i).getId().equals(payment.getId()))
-            {
-                flag=1;
+    public void RejectOrderWithCaution(Payment payment) {
+        int flag = 0;
+        for (int i = 0; i < Dataholder.recentOrderList.size(); i++) {
+            if (Dataholder.recentOrderList.get(i).getId().equals(payment.getId())) {
+                flag = 1;
                 break;
             }
         }
-        if(flag==1)
-        {
+        if (flag == 1) {
             Dataholder.recentOrderList.remove(0);
             //Toast.makeText(this, "Dataholder Size" + Dataholder.recentOrderList.size(), Toast.LENGTH_SHORT).show();
-            if(Dataholder.recentOrderList.size()==0){
+            if (Dataholder.recentOrderList.size() == 0) {
                 dialog.cancel();
-                Refresh();}
-            else
+                Refresh();
+            } else
                 showDialog();
         }
     }
-    public void AddPreparingWithCaution(Payment payment)
-    {
-        int flag=0;
+
+    public void AddPreparingWithCaution(Payment payment) {
+        int flag = 0;
         int i;
-        for(i=0;i<Dataholder.preparingOrderList.size();i++)
-        {
+        for (i = 0; i < Dataholder.preparingOrderList.size(); i++) {
             Log.e("Orders", Dataholder.preparingOrderList.get(i).getId() + "");
-            if(Dataholder.preparingOrderList.get(i).getId().equals(payment.getId()))
-            {
+            if (Dataholder.preparingOrderList.get(i).getId().equals(payment.getId())) {
                 Log.e("Comparing", Dataholder.preparingOrderList.get(i).getId() + "  " + payment.getId());
-                flag=1;
+                flag = 1;
                 break;
             }
         }
-        if(flag==0)
-        {
+        if (flag == 0) {
             Log.e("Comparing1", Dataholder.preparingOrderList.size() + " ");
             Dataholder.preparingOrderList.add(payment);
             orderItemAdapterLatest.notifyDataSetChanged();
@@ -1212,34 +1153,27 @@ public class Homescreen_latest extends AppCompatActivity {
     }
 
 
-
-    public void UpdateStatusCode(Payment payment)
-    {
-        int flag=0;
+    public void UpdateStatusCode(Payment payment) {
+        int flag = 0;
         int i;
-        for( i=0;i<Dataholder.preparingOrderList.size();i++)
-        {
-            if(Dataholder.preparingOrderList.get(i).getId().equals(payment.getId()))
-            {
-                flag=1;
+        for (i = 0; i < Dataholder.preparingOrderList.size(); i++) {
+            if (Dataholder.preparingOrderList.get(i).getId().equals(payment.getId())) {
+                flag = 1;
                 break;
             }
         }
-        if(flag==1 && i!=Dataholder.preparingOrderList.size())
-        {
+        if (flag == 1 && i != Dataholder.preparingOrderList.size()) {
             Dataholder.preparingOrderList.get(i).setStatusCode(3);
             orderItemAdapterLatest.notifyDataSetChanged();
         }
     }
 
-    public void showOrderDialog(Payment payment)
-    {
+    public void showOrderDialog(Payment payment) {
         showInfoDialog(payment);
     }
 
 
-    public void showInfoDialog(Payment payment)
-    {
+    public void showInfoDialog(Payment payment) {
 
         Timestamp timestamp = payment.getPlacedTime();
         Date date = timestamp.toDate();
@@ -1247,60 +1181,43 @@ public class Homescreen_latest extends AppCompatActivity {
         String time_chat_s = df.format(date);
 
 
-        Log.e("PlacedTime" , time_chat_s);
+        Log.e("PlacedTime", time_chat_s);
 
-        String hh = time_chat_s.substring(0,2);
-        String am_pm="";
-        int hour=Integer.parseInt(hh);
-        if(hour<=11)
-        {
+        String hh = time_chat_s.substring(0, 2);
+        String am_pm = "";
+        int hour = Integer.parseInt(hh);
+        if (hour <= 11) {
             am_pm = "AM";
-        }
-        else if(hour>12)
-        {
+        } else if (hour > 12) {
             am_pm = "PM";
             hour = hour - 12;
-        }
-        else
-        {
+        } else {
             am_pm = "PM";
         }
 
-        String orderTime = hour + ":" + time_chat_s.substring(3,5) +" " +  am_pm;
+        String orderTime = hour + ":" + time_chat_s.substring(3, 5) + " " + am_pm;
         infoDialogOrderTime.setText("Today at " + orderTime);
-
-
-
-
-
-
-
 
 
         Window window = infoDialog.getWindow();
         window.setLayout(AbsListView.LayoutParams.MATCH_PARENT, AbsListView.LayoutParams.WRAP_CONTENT);
         Log.e("Payment", payment.getStatusCode() + " ");
-        if(payment.getStatusCode()==3)
-        {
+        if (payment.getStatusCode() == 3) {
             infoOrderReady.setVisibility(View.GONE);
             infoSwipeToDispatch.setVisibility(View.VISIBLE);
-        }
-        else if(payment.getStatusCode()==2 || payment.getStatusCode()==1)
-        {
+        } else if (payment.getStatusCode() == 2 || payment.getStatusCode() == 1) {
             infoOrderReady.setVisibility(View.VISIBLE);
             infoSwipeToDispatch.setVisibility(View.GONE);
         }
 
 
-
-
         newOrdersAdapter1.itemList = payment.getOrderItems();
 
-        infoDialogOrderTotal.setText("₹ "+payment.getBasePrice()+"");
-        String orderID = payment.getPaymentOrderID().substring(payment.getPaymentOrderID().length()-4).toUpperCase();
+        infoDialogOrderTotal.setText("₹ " + payment.getBasePrice() + "");
+        String orderID = payment.getPaymentOrderID().substring(payment.getPaymentOrderID().length() - 4).toUpperCase();
         orderID.toUpperCase();
 
-        infoDialogOrderId.setText(("Order #" +orderID));
+        infoDialogOrderId.setText(("Order #" + orderID));
         infoDialogUserName.setText("from " + payment.getUserName());
 
         newOrdersAdapter1.notifyDataSetChanged();
@@ -1310,33 +1227,16 @@ public class Homescreen_latest extends AppCompatActivity {
     }
 
 
+    public void SendingNotification(String title, String body, String FCMToken) {
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    public void SendingNotification(String title,String body,String FCMToken)
-    {
-
-        if(!FCMToken.equals("")) {
+        if (!FCMToken.equals("")) {
             compositeDisposable.add(fcmCloudFunction.sendNotification(FCMToken, title, body).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Consumer<FcmToken>() {
                         @Override
                         public void accept(FcmToken fcmToken) throws Exception {
                             if (fcmToken.getMulticast_id() != null) {
-                                Log.e("Title",title + "Working");
+                                Log.e("Title", title + "Working");
                                 //refund successful
                                 //refund successful
 
@@ -1357,32 +1257,32 @@ public class Homescreen_latest extends AppCompatActivity {
                     }));
         }
     }
-     public void initRefund(Payment payment){
+
+    public void initRefund(Payment payment) {
         LoadingDialog loadingDialog2 = new LoadingDialog(Homescreen_latest.this, "Initiating refund");
         loadingDialog2.startLoadingDialog();
         //Log.d(order.getOrderID(), Long.toString(order.getTotalAmount()));
-        compositeDisposable.add(refundCloudFunction.getToken(payment.getPaymentOrderID(), Long.toString((long)((long)Math.round (payment.getTotalAmountPaid()-payment.getTaxesAndCharges())))).subscribeOn(Schedulers.io())
+        compositeDisposable.add(refundCloudFunction.getToken(payment.getPaymentOrderID(), Long.toString((long) ((long) Math.round(payment.getTotalAmountPaid() - payment.getTaxesAndCharges())))).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<RefundToken>() {
                     @Override
                     public void accept(RefundToken refundToken) throws Exception {
-                        if(refundToken.getCf_refund_id()!=null) {
+                        if (refundToken.getCf_refund_id() != null) {
                             //refund successful
                             //refund successful
                             loadingDialog2.dismissDialog();
                             db.collection("payment").document(payment.getPaymentOrderID())
                                     .update(
-                                            "statusCode",-1,
+                                            "statusCode", -1,
                                             "refundID", refundToken.getCf_refund_id()).addOnCompleteListener(new OnCompleteListener<Void>() {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
                                             //Toast.makeText(Homescreen_latest.this, "Refund successful", Toast.LENGTH_SHORT).show();
-                                            getFCMToken(payment.getUserID(),"Order Denied","Your order #" + payment.getPaymentOrderID().substring(payment.getPaymentOrderID().length()-4) + " has been denied, refund initiated");
+                                            getFCMToken(payment.getUserID(), "Order Denied", "Your order #" + payment.getPaymentOrderID().substring(payment.getPaymentOrderID().length() - 4) + " has been denied, refund initiated");
 
                                         }
                                     });
-                        }
-                        else{
+                        } else {
                             //Toast.makeText(Homescreen.this, "Could not initiate refund for the last order. Contact support", Toast.LENGTH_SHORT).show();
                             loadingDialog2.dismissDialog();
                         }
@@ -1398,23 +1298,18 @@ public class Homescreen_latest extends AppCompatActivity {
                 }));
     }
 
-    public void UpdateOutletStatus(Boolean outletStatus)
-    {
-        String status = outletStatus==true?"OPEN":"CLOSED";
-        db.collection("outlet").document(outletID).update("openStatus",status).addOnCompleteListener(new OnCompleteListener<Void>() {
+    public void UpdateOutletStatus(Boolean outletStatus) {
+        String status = outletStatus == true ? "OPEN" : "CLOSED";
+        db.collection("outlet").document(outletID).update("openStatus", status).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
-                if(task.isSuccessful())
-                {
-                    if(outletStatus)
-                    {
+                if (task.isSuccessful()) {
+                    if (outletStatus) {
                         //Toast.makeText(Homescreen_latest.this, "Shop is Open", Toast.LENGTH_SHORT).show();
                         orderRVLayout.setVisibility(View.GONE);
                         orderEmptyImage.setImageResource(R.drawable.store_openimg);
                         orderEmptyView.setVisibility(View.VISIBLE);
-                    }
-                    else
-                    {
+                    } else {
                         Toast.makeText(Homescreen_latest.this, "Shop is Closed", Toast.LENGTH_SHORT).show();
                         orderRVLayout.setVisibility(View.GONE);
                         orderEmptyImage.setImageResource(R.drawable.store_closed);
@@ -1425,8 +1320,8 @@ public class Homescreen_latest extends AppCompatActivity {
         });
     }
 
-    public void dispatchOrder(View view){
-       // Toast.makeText(this, "Coming Soon", Toast.LENGTH_SHORT).show();
+    public void dispatchOrder(View view) {
+        // Toast.makeText(this, "Coming Soon", Toast.LENGTH_SHORT).show();
         IntentIntegrator intentIntegrator = new IntentIntegrator(this);
         intentIntegrator.setPrompt("Scan a barcode or QR Code");
         intentIntegrator.setOrientationLocked(true);
@@ -1457,36 +1352,31 @@ public class Homescreen_latest extends AppCompatActivity {
         }
     }
 
-    public void searchPayment(String paymentId)
-    {
-        int flag=0;
-        for(int i=0;i<Dataholder.preparingOrderList.size();i++)
-        {
-            if(Dataholder.preparingOrderList.get(i).getPaymentOrderID().equals(paymentId))
-            {
+    public void searchPayment(String paymentId) {
+        int flag = 0;
+        for (int i = 0; i < Dataholder.preparingOrderList.size(); i++) {
+            if (Dataholder.preparingOrderList.get(i).getPaymentOrderID().equals(paymentId)) {
                 showInfoDialog(Dataholder.preparingOrderList.get(i));
-                flag=1;
+                flag = 1;
                 break;
             }
         }
-        if(flag==0)
-        {
+        if (flag == 0) {
             Toast.makeText(this, "This order is not present", Toast.LENGTH_SHORT).show();
         }
     }
 
 
-    public void addEarning(Payment payment){
+    public void addEarning(Payment payment) {
         //orderBook.startLoadingDialog();
         db.collection("earnings").whereEqualTo("date", startOfDay()).whereEqualTo("outletID", Dataholder.outlet.getId()).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if(task.getResult().isEmpty()){
+                if (task.getResult().isEmpty()) {
                     //Log.e("Earnings", task.getException().getLocalizedMessage());
                     Log.e("Earnings", "Creating new Doc");
                     createNewEarningDocument(payment);
-                }
-                else{
+                } else {
                     Earnings earning = new Earnings();
                     String key = "";
                     for (QueryDocumentSnapshot document : task.getResult()) {
@@ -1494,12 +1384,13 @@ public class Homescreen_latest extends AppCompatActivity {
                         key = document.getId();
                     }
                     Log.e("Earnings", "Updating Earnings");
-                    updateEarning(key,earning,payment);
+                    updateEarning(key, earning, payment);
                 }
             }
         });
     }
-    public void updateEarning(String key, Earnings earning, Payment payment){
+
+    public void updateEarning(String key, Earnings earning, Payment payment) {
         //earning.addOrder(payment);
         earning.setTotalAmount(earning.getTotalAmount() + payment.getBasePrice());
         Log.e("Earnings", "Adding total");
@@ -1515,13 +1406,13 @@ public class Homescreen_latest extends AppCompatActivity {
     }
 
 
-    public void createNewEarningDocument(Payment payment){
-        Earnings earning = new Earnings((int)payment.getBasePrice(), false, Dataholder.outlet.getId(), startOfDay());
+    public void createNewEarningDocument(Payment payment) {
+        Earnings earning = new Earnings((int) payment.getBasePrice(), false, Dataholder.outlet.getId(), startOfDay());
         db.collection("earnings").add(earning).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
             @Override
             public void onComplete(@NonNull Task<DocumentReference> task) {
-                if(task.isSuccessful())
-                    Log.e("Earnings","New Earning Doc Added");
+                if (task.isSuccessful())
+                    Log.e("Earnings", "New Earning Doc Added");
             }
         });
     }
@@ -1530,7 +1421,7 @@ public class Homescreen_latest extends AppCompatActivity {
         Date date = new Date();
         Timestamp nowTime = new Timestamp(date);
         Calendar cal = Calendar.getInstance();
-        cal.setTimeInMillis(nowTime.getSeconds()*1000);
+        cal.setTimeInMillis(nowTime.getSeconds() * 1000);
         cal.set(Calendar.HOUR_OF_DAY, 0); //set hours to zero
         cal.set(Calendar.MINUTE, 0); // set minutes to zero
         cal.set(Calendar.SECOND, 0); //set seconds to zero
@@ -1538,11 +1429,12 @@ public class Homescreen_latest extends AppCompatActivity {
         nowTime = new Timestamp(date2);
         return (nowTime);
     }
+
     public Timestamp endOfDay() {
         Date date = new Date();
         Timestamp nowTime = new Timestamp(date);
         Calendar cal = Calendar.getInstance();
-        cal.setTimeInMillis(nowTime.getSeconds()*1000);
+        cal.setTimeInMillis(nowTime.getSeconds() * 1000);
         cal.set(Calendar.HOUR_OF_DAY, 23); //set hours to zero
         cal.set(Calendar.MINUTE, 59); // set minutes to zero
         cal.set(Calendar.SECOND, 59); //set seconds to zero
@@ -1551,21 +1443,18 @@ public class Homescreen_latest extends AppCompatActivity {
         return (nowTime);
     }
 
-    public void getFCMToken(String StudentUserId,String title,String body)
-    {
+    public void getFCMToken(String StudentUserId, String title, String body) {
         String fcm;
         db.collection("studentUser").document(StudentUserId).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                try{
+                try {
                     StudentWithFCM studentWithFCM = task.getResult().toObject(StudentWithFCM.class);
                     FCMToken = studentWithFCM.getFCMToken();
-                    SendingNotification(title,body,FCMToken);
-                }
-                catch (Exception e)
-                {
+                    SendingNotification(title, body, FCMToken);
+                } catch (Exception e) {
                     StudentWithoutFCM studentWithoutFCM = task.getResult().toObject(StudentWithoutFCM.class);
-                    FCMToken =  "";
+                    FCMToken = "";
                 }
 
             }
@@ -1577,10 +1466,9 @@ public class Homescreen_latest extends AppCompatActivity {
         db.collection("support").whereEqualTo("campusID", campusID).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if(task.isSuccessful())
-                {
+                if (task.isSuccessful()) {
                     for (QueryDocumentSnapshot document : task.getResult()) {
-                        Support  support = document.toObject(Support.class);
+                        Support support = document.toObject(Support.class);
                         Dataholder.support = support;
                     }
                 }
@@ -1588,10 +1476,9 @@ public class Homescreen_latest extends AppCompatActivity {
         });
     }
 
-    public void contactSupport()
-    {
-        String text = "Hi, this is " +Dataholder.outlet.getName() + ".  I request support for paymentOrderID " + infoDialogPayment.getPaymentOrderID() + " placed by " + infoDialogPayment.getUserName() + " total amount: " + infoDialogPayment.getBasePrice() ;
-        String url = "https://api.whatsapp.com/send?phone=" + Dataholder.support.getPhoneNumber()+ "&text=" + text;
+    public void contactSupport() {
+        String text = "Hi, this is " + Dataholder.outlet.getName() + ".  I request support for paymentOrderID " + infoDialogPayment.getPaymentOrderID() + " placed by " + infoDialogPayment.getUserName() + " total amount: " + infoDialogPayment.getBasePrice();
+        String url = "https://api.whatsapp.com/send?phone=" + Dataholder.support.getPhoneNumber() + "&text=" + text;
         try {
             PackageManager pm = getApplicationContext().getPackageManager();
             pm.getPackageInfo("com.whatsapp", PackageManager.GET_ACTIVITIES);
@@ -1602,25 +1489,22 @@ public class Homescreen_latest extends AppCompatActivity {
             getApplicationContext().startActivity(i);
         } catch (PackageManager.NameNotFoundException e) {
             Toast.makeText(getApplicationContext(), "Whatsapp is not installed in this phone", Toast.LENGTH_SHORT).show();
-            Log.e("I am here",e.getLocalizedMessage());
+            Log.e("I am here", e.getLocalizedMessage());
         }
     }
 
-    public void Refresh()
-    {
+    public void Refresh() {
         Dataholder.preparingOrderList.clear();
         Dataholder.recentOrderList.clear();
         fetchOrders();
     }
 
-    public void CallCustomer(String userID)
-    {
+    public void CallCustomer(String userID) {
 
         db.collection("studentUser").document(userID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if(task.isSuccessful())
-                {
+                if (task.isSuccessful()) {
                     DocumentSnapshot document = task.getResult();
                     if (document.exists()) {
                         StudentWithFCM studentWithFCM = task.getResult().toObject(StudentWithFCM.class);
@@ -1628,14 +1512,12 @@ public class Homescreen_latest extends AppCompatActivity {
                         String phoneNumber = studentWithFCM.getPhoneNumber();
 
 
-
-
-                        if(phoneNumber.length()>=10){
+                        if (phoneNumber.length() >= 10) {
                             Log.e("PhoneNumber", studentWithFCM.getPhoneNumber());
-                            callIntent.setData(Uri.parse("tel:"+studentWithFCM.getPhoneNumber()));
-                        startActivity(callIntent);}
+                            callIntent.setData(Uri.parse("tel:" + studentWithFCM.getPhoneNumber()));
+                            startActivity(callIntent);
+                        }
                     }
-
 
 
                 }
@@ -1644,15 +1526,14 @@ public class Homescreen_latest extends AppCompatActivity {
     }
 
 
-    public String createPrintSlip()
-    {
-        String slip ="[C]<font size='big'>      ZING</font>";
+    public String createPrintSlip() {
+        String slip = "[C]<font size='big'>      ZING</font>";
         //slip = "[C]<img>" + PrinterTextParserImg.bitmapToHexadecimalString(printer, this.getApplicationContext().getResources().getDrawableForDensity(R.drawable.logo_orange, DisplayMetrics.DENSITY_MEDIUM))+"</img>\n";
         slip += "[L]\n";
         slip += "[L]<b>Order type : ";
         slip += "[R]<font size='big'>        " + Dataholder.printingPayment.getOrderType() + "</font>\n";
         slip += "[L]<b>" + "Order ID : ";
-        slip += "[R]<font size='big'>        " +   "#" + Dataholder.printingPayment.getPaymentOrderID().substring(Dataholder.printingPayment.getPaymentOrderID().length()-4) + "</font>\n";
+        slip += "[R]<font size='big'>        " + "#" + Dataholder.printingPayment.getPaymentOrderID().substring(Dataholder.printingPayment.getPaymentOrderID().length() - 4) + "</font>\n";
         slip += "[L]<b>" + "Order From : ";
         slip += "[R]<font size='big'>        " + Dataholder.printingPayment.getUserName() + "</font>\n";
         //slip += "[L]<font size='big'>" + Dataholder.printingPayment.orderType + "           #" + Dataholder.printingPayment.getPaymentOrderID().substring(Dataholder.printingPayment.getPaymentOrderID().length()-4) + "</font>\n";
@@ -1660,8 +1541,7 @@ public class Homescreen_latest extends AppCompatActivity {
         //Add phone no here
         slip += "[C]<b>=========================================\n";
 
-        for(int i=0;i<Dataholder.printingPayment.getOrderItems().size();i++)
-        {
+        for (int i = 0; i < Dataholder.printingPayment.getOrderItems().size(); i++) {
             slip += "[L]<font size='big-4'>" + Dataholder.printingPayment.getOrderItems().get(i).getItemName() + "</font>";
             slip += "[R]<font size='big-4'> X" + Dataholder.printingPayment.getOrderItems().get(i).getItemQuantity() + "</font>\n\n";
         }
@@ -1670,74 +1550,137 @@ public class Homescreen_latest extends AppCompatActivity {
         slip += "[R]<font size='big-4'>     Total Amount: " + Dataholder.printingPayment.getBasePrice() + "</font>\n";
 
 
-
         return slip;
 
     }
 
 
+    public void printBluetooth() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.BLUETOOTH}, Homescreen_latest.PERMISSION_BLUETOOTH);
+        } else if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_ADMIN) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.BLUETOOTH_ADMIN}, Homescreen_latest.PERMISSION_BLUETOOTH_ADMIN);
+        } else if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S && ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.BLUETOOTH_CONNECT}, Homescreen_latest.PERMISSION_BLUETOOTH_CONNECT);
+        } else if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S && ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.BLUETOOTH_SCAN}, Homescreen_latest.PERMISSION_BLUETOOTH_SCAN);
+        } else {
+            new AsyncBluetoothEscPosPrint(
+                    this,
+                    new AsyncEscPosPrint.OnPrintFinished() {
+                        @Override
+                        public void onError(AsyncEscPosPrinter asyncEscPosPrinter, int codeException) {
+                            Log.e("Async.OnPrintFinished", "AsyncEscPosPrint.OnPrintFinished : An error occurred !");
+                        }
 
-    public void printSlip()
-    {
-
-        String slip = createPrintSlip();
-        try {
-            printer = new EscPosPrinter(BluetoothPrintersConnections.selectFirstPaired(), 203, 72f, 32);
-        } catch (EscPosConnectionException e) {
-            e.printStackTrace();
+                        @Override
+                        public void onSuccess(AsyncEscPosPrinter asyncEscPosPrinter) {
+                            Log.i("Async.OnPrintFinished", "AsyncEscPosPrint.OnPrintFinished : Print is finished !");
+                        }
+                    }
+            )
+                    .execute(this.getAsyncEscPosPrinter(selectedDevice));
         }
-        try{
-            printer.printFormattedText(slip);
-
-          /*  printer
-                    .printFormattedText(
-                            "[C]<img size='30'>https://zammit.s3-eu-west-1.amazonaws.com/website_assets/images/000/059/073/large/image.png?1664184913" +"</img>\n" +
-                                    "[L]\n" +
-                                    "[C]<u><font size='big'>ORDER N°045</font></u>\n" +
-                                    "[L]\n" +
-                                    "[C]================================\n" +
-                                    "[L]\n" +
-                                    "[L]<b>BEAUTIFUL SHIRT</b>[R]9.99e\n" +
-                                    "[L]  + Size : S\n" +
-                                    "[L]\n" +
-                                    "[L]<b>AWESOME HAT</b>[R]24.99e\n" +
-                                    "[L]  + Size : 57/58\n" +
-                                    "[L]\n" +
-                                    "[C]--------------------------------\n" +
-                                    "[R]TOTAL PRICE :[R]34.98e\n" +
-                                    "[R]TAX :[R]4.23e\n" +
-                                    "[L]\n" +
-                                    "[C]================================\n" +
-                                    "[L]\n" +
-                                    "[L]<font size='tall'>Customer :</font>\n" +
-                                    "[L]Raymond DUPONT\n" +
-                                    "[L]5 rue des girafes\n" +
-                                    "[L]31547 PERPETES\n" +
-                                    "[L]Tel : +33801201456\n" +
-                                    "[L]\n" +
-                                    "[C]<barcode type='ean13' height='10'>831254784551</barcode>\n" +
-                                    "[C]<qrcode size='20'>http://www.developpeur-web.dantsu.com/</qrcode>"
-                    );*/
-        } catch (EscPosEncodingException e) {
-            e.printStackTrace();
-        } catch (EscPosBarcodeException e) {
-            e.printStackTrace();
-        } catch (EscPosParserException e) {
-            e.printStackTrace();
-        } catch (EscPosConnectionException e) {
-            e.printStackTrace();
-        }
-
-
     }
 
-
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            switch (requestCode) {
+                case Homescreen_latest.PERMISSION_BLUETOOTH:
+                case Homescreen_latest.PERMISSION_BLUETOOTH_ADMIN:
+                case Homescreen_latest.PERMISSION_BLUETOOTH_CONNECT:
+                case Homescreen_latest.PERMISSION_BLUETOOTH_SCAN:
+                    this.printBluetooth();
+                    break;
+            }
+        }
+    }
 
 
     @Override
     protected void onStop() {
         super.onStop();
         compositeDisposable.clear();
+    }
+
+    public void browseBluetoothDevice() {
+        final BluetoothConnection[] bluetoothDevicesList = (new BluetoothPrintersConnections()).getList();
+
+        if (bluetoothDevicesList != null) {
+            final String[] items = new String[bluetoothDevicesList.length + 1];
+            items[0] = "Default printer";
+            int i = 0;
+            for (BluetoothConnection device : bluetoothDevicesList) {
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+
+                    return;
+                }
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+
+                    return;
+                }
+                items[++i] = device.getDevice().getName();
+            }
+
+            AlertDialog.Builder alertDialog = new AlertDialog.Builder(Homescreen_latest.this);
+            alertDialog.setTitle("Bluetooth printer selection");
+            alertDialog.setItems(items, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    int index = i - 1;
+                    if (index == -1) {
+                        selectedDevice = null;
+                    } else {
+                        selectedDevice = bluetoothDevicesList[index];
+                    }
+//                    Button button = (Button) findViewById(R.id.button_bluetooth_browse);
+//                    button.setText(items[i]);
+                }
+            });
+
+            AlertDialog alert = alertDialog.create();
+            alert.setCanceledOnTouchOutside(false);
+            alert.show();
+
+        }
+    }
+
+    public AsyncEscPosPrinter getAsyncEscPosPrinter(DeviceConnection printerConnection) {
+        SimpleDateFormat format = new SimpleDateFormat("'on' yyyy-MM-dd 'at' HH:mm:ss");
+        AsyncEscPosPrinter printer = new AsyncEscPosPrinter(printerConnection, 203, 48f, 32);
+        return printer.addTextToPrint(
+                "[C]<img>" + PrinterTextParserImg.bitmapToHexadecimalString(printer, this.getApplicationContext().getResources().getDrawableForDensity(R.drawable.zing_business_logo, DisplayMetrics.DENSITY_MEDIUM)) + "</img>\n" +
+                        "[L]\n" +
+                        "[C]<u><font size='big'>ORDER N°045</font></u>\n" +
+                        "[L]\n" +
+                        "[C]<u type='double'>" + format.format(new Date()) + "</u>\n" +
+                        "[C]\n" +
+                        "[C]================================\n" +
+                        "[L]\n" +
+                        "[L]<b>BEAUTIFUL SHIRT</b>[R]9.99€\n" +
+                        "[L]  + Size : S\n" +
+                        "[L]\n" +
+                        "[L]<b>AWESOME HAT</b>[R]24.99€\n" +
+                        "[L]  + Size : 57/58\n" +
+                        "[L]\n" +
+                        "[C]--------------------------------\n" +
+                        "[R]TOTAL PRICE :[R]34.98€\n" +
+                        "[R]TAX :[R]4.23€\n" +
+                        "[L]\n" +
+                        "[C]================================\n" +
+                        "[L]\n" +
+                        "[L]<u><font color='bg-black' size='tall'>Customer :</font></u>\n" +
+                        "[L]Raymond DUPONT\n" +
+                        "[L]5 rue des girafes\n" +
+                        "[L]31547 PERPETES\n" +
+                        "[L]Tel : +33801201456\n" +
+                        "\n" +
+                        "[C]<barcode type='ean13' height='10'>831254784551</barcode>\n" +
+                        "[L]\n" +
+                        "[C]<qrcode size='20'>http://www.developpeur-web.dantsu.com/</qrcode>\n"
+        );
     }
 
 
