@@ -66,10 +66,12 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.karumi.dexter.Dexter;
+import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionDeniedResponse;
 import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 import com.karumi.dexter.listener.single.PermissionListener;
 import com.ncorti.slidetoact.SlideToActView;
 import com.zingit.restaurant.model.FcmToken;
@@ -88,6 +90,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -188,7 +191,10 @@ public class Homescreen_latest extends AppCompatActivity {
 
 
         //printSlip();
+        browseBluetoothDevice();
         setupUI();
+
+
 
         dialogAcceptOrder.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -488,6 +494,56 @@ public class Homescreen_latest extends AppCompatActivity {
                     @Override
                     public void onPermissionRationaleShouldBeShown(PermissionRequest permission, PermissionToken token) {/* ... */}
                 }).check();
+        Dexter.withContext(this)
+                .withPermission(Manifest.permission.BLUETOOTH_SCAN)
+                .withListener(new PermissionListener() {
+                    @Override
+                    public void onPermissionGranted(PermissionGrantedResponse response) {/* ... */}
+
+                    @Override
+                    public void onPermissionDenied(PermissionDeniedResponse response) {/* ... */}
+
+                    @Override
+                    public void onPermissionRationaleShouldBeShown(PermissionRequest permission, PermissionToken token) {/* ... */}
+                }).check();
+        Dexter.withContext(this)
+                .withPermission(Manifest.permission.BLUETOOTH_ADMIN)
+                .withListener(new PermissionListener() {
+                    @Override
+                    public void onPermissionGranted(PermissionGrantedResponse response) {/* ... */}
+
+                    @Override
+                    public void onPermissionDenied(PermissionDeniedResponse response) {/* ... */}
+
+                    @Override
+                    public void onPermissionRationaleShouldBeShown(PermissionRequest permission, PermissionToken token) {/* ... */}
+                }).check();
+        Dexter.withContext(this)
+                .withPermission(Manifest.permission.BLUETOOTH_CONNECT)
+                .withListener(new PermissionListener() {
+                    @Override
+                    public void onPermissionGranted(PermissionGrantedResponse response) {/* ... */}
+
+                    @Override
+                    public void onPermissionDenied(PermissionDeniedResponse response) {/* ... */}
+
+                    @Override
+                    public void onPermissionRationaleShouldBeShown(PermissionRequest permission, PermissionToken token) {/* ... */}
+                }).check();
+        Dexter.withContext(this)
+                .withPermission(Manifest.permission.BLUETOOTH)
+                .withListener(new PermissionListener() {
+                    @Override
+                    public void onPermissionGranted(PermissionGrantedResponse response) {/* ... */}
+
+                    @Override
+                    public void onPermissionDenied(PermissionDeniedResponse response) {/* ... */}
+
+                    @Override
+                    public void onPermissionRationaleShouldBeShown(PermissionRequest permission, PermissionToken token) {/* ... */}
+                }).check();
+
+
 
         View view = getLayoutInflater().inflate(R.layout.new_order_dialog, null);
         dialog = new Dialog(Homescreen_latest.this, android.R.style.Theme_DeviceDefault_Light_NoActionBar);
@@ -915,10 +971,11 @@ public class Homescreen_latest extends AppCompatActivity {
                         Log.e("OrderAccepted", Dataholder.recentOrderList.size() + " ");
 
                         Log.e("IsPrinterAvailable", Dataholder.outlet.getisPrinterAvailable() + " ");
+                        printBluetooth();
 
                         if(Dataholder.outlet.getisPrinterAvailable())   // check if the shop has printer or not
                         {
-                            printBluetooth();
+
 
 
                         }
@@ -1621,7 +1678,8 @@ public class Homescreen_latest extends AppCompatActivity {
 
                     return;
                 }
-                items[++i] = device.getDevice().getName();
+                items[i] = device.getDevice().getName();
+                Log.e("items21",items[i++]);
             }
 
             AlertDialog.Builder alertDialog = new AlertDialog.Builder(Homescreen_latest.this);
