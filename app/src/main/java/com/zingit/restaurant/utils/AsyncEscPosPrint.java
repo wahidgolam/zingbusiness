@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.widget.Toast;
 
 import com.dantsu.escposprinter.EscPosCharsetEncoding;
 import com.dantsu.escposprinter.EscPosPrinter;
@@ -147,10 +148,7 @@ public abstract class AsyncEscPosPrint extends AsyncTask<AsyncEscPosPrinter, Int
 
         switch (result.getPrinterStatus()) {
             case AsyncEscPosPrint.FINISH_SUCCESS:
-                new AlertDialog.Builder(context)
-                        .setTitle("Success")
-                        .setMessage("Congratulation ! The texts are printed !")
-                        .show();
+                Toast.makeText(context, "Printed Successfully", Toast.LENGTH_SHORT).show();
                 break;
             case AsyncEscPosPrint.FINISH_NO_PRINTER:
                 new AlertDialog.Builder(context)
@@ -185,9 +183,9 @@ public abstract class AsyncEscPosPrint extends AsyncTask<AsyncEscPosPrinter, Int
         }
         if(this.onPrintFinished != null) {
             if (result.getPrinterStatus() == AsyncEscPosPrint.FINISH_SUCCESS) {
-                this.onPrintFinished.onSuccess(result.getAsyncEscPosPrinter());
+                //this.onPrintFinished.onSuccess(result.getAsyncEscPosPrinter());
             } else {
-                this.onPrintFinished.onError(result.getAsyncEscPosPrinter(), result.getPrinterStatus());
+                //this.onPrintFinished.onError(result.getAsyncEscPosPrinter(), result.getPrinterStatus());
             }
         }
     }

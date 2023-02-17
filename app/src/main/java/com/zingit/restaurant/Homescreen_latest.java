@@ -1598,7 +1598,7 @@ public class Homescreen_latest extends AppCompatActivity {
         slip += "[L]<b>Order type : ";
         slip += "[R]<font size='big'>        " + Dataholder.printingPayment.getOrderType() + "</font>\n";
         slip += "[L]<b>" + "Order ID : ";
-        slip += "[R]<font size='big'>        " + "#" + Dataholder.printingPayment.getPaymentOrderID().substring(Dataholder.printingPayment.getPaymentOrderID().length() - 4) + "</font>\n";
+        slip += "[R]<font size='big'>        " + "#" + Dataholder.printingPayment.getPaymentOrderID().substring(Dataholder.printingPayment.getPaymentOrderID().length() - 4).toUpperCase(Locale.ROOT) + "</font>\n";
         slip += "[L]<b>" + "Order From : ";
         slip += "[R]<font size='big'>        " + Dataholder.printingPayment.getUserName() + "</font>\n";
         //slip += "[L]<font size='big'>" + Dataholder.printingPayment.orderType + "           #" + Dataholder.printingPayment.getPaymentOrderID().substring(Dataholder.printingPayment.getPaymentOrderID().length()-4) + "</font>\n";
@@ -1619,7 +1619,7 @@ public class Homescreen_latest extends AppCompatActivity {
 
     }
 
-
+    String printed_payment = "";
     public void printBluetooth() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.BLUETOOTH}, Homescreen_latest.PERMISSION_BLUETOOTH);
@@ -1630,21 +1630,30 @@ public class Homescreen_latest extends AppCompatActivity {
         } else if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S && ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.BLUETOOTH_SCAN}, Homescreen_latest.PERMISSION_BLUETOOTH_SCAN);
         } else {
-            new AsyncBluetoothEscPosPrint(
-                    this,
-                    new AsyncEscPosPrint.OnPrintFinished() {
-                        @Override
-                        public void onError(AsyncEscPosPrinter asyncEscPosPrinter, int codeException) {
-                            Log.e("Async.OnPrintFinished", "AsyncEscPosPrint.OnPrintFinished : An error occurred !");
-                        }
+            try {
+                if(!Dataholder.printingPayment.paymentOrderID.equals(printed_payment)){
+                    printed_payment = Dataholder.printingPayment.paymentOrderID;
+                    new AsyncBluetoothEscPosPrint(
+                            this,
+                            new AsyncEscPosPrint.OnPrintFinished() {
+                                @Override
+                                public void onError(AsyncEscPosPrinter asyncEscPosPrinter, int codeException) {
+                                    Log.e("Async.OnPrintFinished", "AsyncEscPosPrint.OnPrintFinished : An error occurred !");
+                                }
 
-                        @Override
-                        public void onSuccess(AsyncEscPosPrinter asyncEscPosPrinter) {
-                            Log.i("Async.OnPrintFinished", "AsyncEscPosPrint.OnPrintFinished : Print is finished !");
-                        }
-                    }
-            )
-                    .execute(this.getAsyncEscPosPrinter(selectedDevice));
+                                @Override
+                                public void onSuccess(AsyncEscPosPrinter asyncEscPosPrinter) {
+                                    Log.i("Async.OnPrintFinished", "AsyncEscPosPrint.OnPrintFinished : Print is finished !");
+                                }
+                            }
+                    )
+                            .execute(this.getAsyncEscPosPrinter(selectedDevice));
+                }
+
+            }
+            catch(Exception e){
+                e.printStackTrace();
+            }
         }
     }
 
@@ -1712,12 +1721,18 @@ public class Homescreen_latest extends AppCompatActivity {
 
         }
     }
-
+    String printedPaymentID = "";
     public AsyncEscPosPrinter getAsyncEscPosPrinter(DeviceConnection printerConnection) {
         String slip = createPrintSlip();
         SimpleDateFormat format = new SimpleDateFormat("'on' yyyy-MM-dd 'at' HH:mm:ss");
         AsyncEscPosPrinter printer = new AsyncEscPosPrinter(printerConnection, 203, 48f, 32);
-        return printer.addTextToPrint(slip);
+        if(!Dataholder.printingPayment.paymentOrderID.equals(printedPaymentID)) {
+            printedPaymentID = Dataholder.printingPayment.paymentOrderID;
+            return printer.addTextToPrint(slip);
+        }
+        else{
+            return null;
+        }
     }
 
     private void checkPermissions(){
