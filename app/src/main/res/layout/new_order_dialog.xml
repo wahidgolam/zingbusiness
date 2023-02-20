@@ -20,7 +20,7 @@
             android:layout_width="150dp"
             android:layout_height="150dp"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="50dp"
             android:background="@drawable/new_order_biggercircle">
 
             <RelativeLayout
@@ -69,15 +69,16 @@
             android:textColor="#166643"/>
 
         <TextView
+            android:visibility="invisible"
+            android:id="@+id/orderType"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/textView2"
-            android:text="Order Type : TakeAway"
             android:layout_centerHorizontal="true"
-            android:id="@+id/orderType"
             android:layout_marginTop="4dp"
-            android:textSize="16sp"
-            android:fontFamily="@font/duplet_bold"/>
+            android:fontFamily="@font/duplet_bold"
+            android:text="Order Type : TakeAway"
+            android:textSize="16sp" />
 
         <RelativeLayout
             android:layout_width="match_parent"

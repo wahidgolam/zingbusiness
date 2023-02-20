@@ -756,7 +756,6 @@ public class Homescreen_latest extends AppCompatActivity {
                 }
                 if (!value.isEmpty()) {
 
-
                     for (DocumentChange dc : value.getDocumentChanges()) {
                         switch (dc.getType()) {
                             case ADDED:
@@ -769,7 +768,14 @@ public class Homescreen_latest extends AppCompatActivity {
                                     case 1:
                                         Log.e("Added Payment", counter++ + " ");
                                         Log.e("Added Orders", added_payment.getPaymentOrderID());
-                                        AddWithCaution(added_payment);
+                                        final Handler handler = new Handler(Looper.getMainLooper());
+                                        handler.postDelayed(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                //Do something after 100ms
+                                                AddWithCaution(added_payment);
+                                            }
+                                        }, 1000);
                                         break;
                                     case 2:
                                         Log.e("Added", added_payment.getPaymentOrderID());
@@ -911,27 +917,27 @@ public class Homescreen_latest extends AppCompatActivity {
 
         Log.e("ShowDialog", "In show dialog");
         Payment newOrder = Dataholder.recentOrderList.get(0);
+        if(newOrder!=null) {
+            Timestamp timestamp = newOrder.getPlacedTime();
+            Date date = timestamp.toDate();
+            DateFormat df = new SimpleDateFormat("HH:mm", Locale.US);
+            String time_chat_s = df.format(date);
+            Log.e("PlacedTime", time_chat_s);
+            String hh = time_chat_s.substring(0, 2);
+            String am_pm = "";
+            int hour = Integer.parseInt(hh);
+            if (hour <= 11) {
+                am_pm = "AM";
+            } else if (hour > 12) {
+                am_pm = "PM";
+                hour = hour - 12;
+            } else {
+                am_pm = "PM";
+            }
 
-        Timestamp timestamp = newOrder.getPlacedTime();
-        Date date = timestamp.toDate();
-        DateFormat df = new SimpleDateFormat("HH:mm", Locale.US);
-        String time_chat_s = df.format(date);
-        Log.e("PlacedTime", time_chat_s);
-        String hh = time_chat_s.substring(0, 2);
-        String am_pm = "";
-        int hour = Integer.parseInt(hh);
-        if (hour <= 11) {
-            am_pm = "AM";
-        } else if (hour > 12) {
-            am_pm = "PM";
-            hour = hour - 12;
-        } else {
-            am_pm = "PM";
-        }
-
-        String orderTime = hour + ":" + time_chat_s.substring(3, 5) + " " + am_pm;
-        dialogOrderTime.setText("Today at " + orderTime);
-        time = 15; // default time for all orders
+            String orderTime = hour + ":" + time_chat_s.substring(3, 5) + " " + am_pm;
+            dialogOrderTime.setText("Today at " + orderTime);
+            time = 15; // default time for all orders
 
         /*if(orderTypeArrayList.size()>0)
         {
@@ -939,17 +945,22 @@ public class Homescreen_latest extends AppCompatActivity {
         }*/
 
 
-        dialogNoOfOrders.setText(Dataholder.recentOrderList.size() + "");
-        String orderId = newOrder.getPaymentOrderID().substring(newOrder.getPaymentOrderID().length() - 4).toUpperCase();
-        dialogOrderId.setText("Order #" + orderId);
-        dialogUserName.setText("from " + newOrder.getUserName());
-        dialogOrderTotal.setText("₹ " + newOrder.getBasePrice());
-        dialogOrderTypeText.setText("Order Type: " + newOrder.getOrderType());
+            dialogNoOfOrders.setText(Dataholder.recentOrderList.size() + "");
+            String orderId = newOrder.getPaymentOrderID().substring(newOrder.getPaymentOrderID().length() - 4).toUpperCase();
+            dialogOrderId.setText((newOrder.getOrderType()+ " #" + orderId));
+            dialogUserName.setText("from " + newOrder.getUserName());
+            dialogOrderTotal.setText("₹ " + newOrder.getBasePrice());
+            dialogOrderTypeText.setText("Order Type: " + newOrder.getOrderType());
 
-        newOrdersAdapter.itemList = newOrder.getOrderItems();
-        newOrdersAdapter.notifyDataSetChanged();
+            newOrdersAdapter.itemList = newOrder.getOrderItems();
+            newOrdersAdapter.notifyDataSetChanged();
 
-        dialog.show();
+            dialog.show();
+        }
+        else{
+            Refresh();
+        }
+
     }
 
     public void continueAccept() {
@@ -983,8 +994,6 @@ public class Homescreen_latest extends AppCompatActivity {
 
                         if(Dataholder.outlet.getisPrinterAvailable())   // check if the shop has printer or not
                         {
-
-
 
                         }
 
@@ -1591,26 +1600,29 @@ public class Homescreen_latest extends AppCompatActivity {
     }
 
 
-    public String createPrintSlip() {
-        String slip = "[C]<font size='big'>      ZING</font>";
-        //slip = "[C]<img>" + PrinterTextParserImg.bitmapToHexadecimalString(printer, this.getApplicationContext().getResources().getDrawableForDensity(R.drawable.logo_orange, DisplayMetrics.DENSITY_MEDIUM))+"</img>\n";
+    public String createPrintSlip(AsyncEscPosPrinter printer) {
+        String type = (Dataholder.printingPayment.getOrderType().equals("DineIn")? "Dine-in": Dataholder.printingPayment.getOrderType().equals("TakeAway")? "Takeaway": "Order");
+        //String slip = "[C]<font size='big'>      ZING</font>";
+        String slip = "[C]<img>" + PrinterTextParserImg.bitmapToHexadecimalString(printer, this.getApplicationContext().getResources().getDrawableForDensity(R.drawable.logo_orange, DisplayMetrics.DENSITY_MEDIUM))+"</img>\n";
         slip += "[L]\n";
         slip += "[L]<b>Order type : ";
-        slip += "[R]<font size='big'>        " + Dataholder.printingPayment.getOrderType() + "</font>\n";
+        slip += "[R]<font size='big'>        " + type + "</font>\n";
         slip += "[L]<b>" + "Order ID : ";
         slip += "[R]<font size='big'>        " + "#" + Dataholder.printingPayment.getPaymentOrderID().substring(Dataholder.printingPayment.getPaymentOrderID().length() - 4).toUpperCase(Locale.ROOT) + "</font>\n";
         slip += "[L]<b>" + "Order From : ";
         slip += "[R]<font size='big'>        " + Dataholder.printingPayment.getUserName() + "</font>\n";
+        //slip += "[L]<b>" + "Due time : ";
+        //slip += "[R]<font size='big'>        " + (Dataholder.printingPayment.getZingTime().getSeconds()- new Date().getSeconds())/60 + "mins </font>\n";
         //slip += "[L]<font size='big'>" + Dataholder.printingPayment.orderType + "           #" + Dataholder.printingPayment.getPaymentOrderID().substring(Dataholder.printingPayment.getPaymentOrderID().length()-4) + "</font>\n";
         //slip += "[L]<font size='big'>Order from        " + Dataholder.printingPayment.getUserName().toUpperCase() + "</font>\n";
         //Add phone no here
-        slip += "[C]<b>=========================================\n";
+        slip += "[C]<b>==============================================\n";
 
         for (int i = 0; i < Dataholder.printingPayment.getOrderItems().size(); i++) {
             slip += "[L]<font size='big-4'>" + Dataholder.printingPayment.getOrderItems().get(i).getItemName() + "</font>";
             slip += "[R]<font size='big-4'> X" + Dataholder.printingPayment.getOrderItems().get(i).getItemQuantity() + "</font>\n\n";
         }
-        slip += "[C]<b>=========================================\n";
+        slip += "[C]<b>=============================================\n";
 
         slip += "[R]<font size='big-4'>     Total Amount: " + Dataholder.printingPayment.getBasePrice() + "</font>\n";
 
@@ -1723,9 +1735,9 @@ public class Homescreen_latest extends AppCompatActivity {
     }
     String printedPaymentID = "";
     public AsyncEscPosPrinter getAsyncEscPosPrinter(DeviceConnection printerConnection) {
-        String slip = createPrintSlip();
         SimpleDateFormat format = new SimpleDateFormat("'on' yyyy-MM-dd 'at' HH:mm:ss");
         AsyncEscPosPrinter printer = new AsyncEscPosPrinter(printerConnection, 203, 48f, 32);
+        String slip = createPrintSlip(printer);
         if(!Dataholder.printingPayment.paymentOrderID.equals(printedPaymentID)) {
             printedPaymentID = Dataholder.printingPayment.paymentOrderID;
             return printer.addTextToPrint(slip);
